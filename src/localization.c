@@ -30,13 +30,13 @@ int main() {
 // Sets the center of the field in the local frame of the robot
 // Defines the robot's distance (unscaled) from the center of the frame
 void set4Pts(int X1, int Y1, int X2, int Y2, int X3, int Y3, int X4, int Y4) {
-	int minDist, maxDist, d12, d13, d14, d23, d24, d34;
-	d12 = (X2-X1)^2 + (Y2 - Y1)^2;
-	d13 = (X3-X1)^2 + (Y3 - Y1)^2;
-	d14 = (X4-X1)^2 + (Y4 - Y1)^2;
-	d23 = (X3-X2)^2 + (Y3 - Y2)^2;
-	d24 = (X4-X2)^2 + (Y4 - Y2)^2;
-	d34 = (X4-X2)^2 + (Y4 - Y2)^2;
+	long minDist, maxDist, d12, d13, d14, d23, d24, d34;
+	d12 = pow((X2 - X1), 2) + pow((Y2 - Y1), 2);
+	d13 = pow((X3 - X1), 2) + pow((Y3 - Y1), 2);
+	d14 = pow((X4 - X1), 2) + pow((Y4 - Y1), 2);
+	d23 = pow((X3 - X2), 2) + pow((Y3 - Y2), 2);
+	d24 = pow((X4 - X2), 2) + pow((Y4 - Y2), 2);
+	d34 = pow((X4 - X2), 2) + pow((Y4 - Y2), 2);
 	maxDist = max (max (max(d12, d13), max(d14, d23)), max(d24, d34));
 	minDist = min (min (min(d12, d13), min(d14, d23)), min(d24, d34));
 
@@ -66,7 +66,7 @@ void set4Pts(int X1, int Y1, int X2, int Y2, int X3, int Y3, int X4, int Y4) {
 			B.x = X3; B.y = Y3; D.x = X4; D.y = Y4;
 		} else { D.x = X3; D.y = Y3; B.x = X4; B.y = Y4; }
 	} else { 
-		printf("Something is wrong. Largest distance is %d\n", maxDist);
+		printf("Something is wrong. Largest distance is %ld\n", maxDist);
 	}
 
 	center.x = (B.x + D.x) / 2;
