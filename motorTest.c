@@ -23,10 +23,9 @@ void stop(void);
 int main(void){
 	init();
 	m_usb_init(); // initialize usb
-	// timer1_init(); // setup timer 1
+	timer1_init(); // setup timer 1
 
 	while(1){
-		set(MOTOR,MOTOR_EN);
 		fwd();
 	}
 
@@ -94,3 +93,5 @@ ISR(TIMER1_COMPB_vect){   //PWM signal goes high
 	set(MOTOR,MOTOR_EN);
 	set(MOTOR,6);
 }
+
+
