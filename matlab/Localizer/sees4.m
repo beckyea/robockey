@@ -18,39 +18,39 @@ Bx = 0; By = 0; Dx = 0; Dy = 0;
 % check largest distance values to determine B and D, find center
 if (maxDist == d12)
     if (minDist == d13 || minDist == d14)
-        Bx = X1n; By = Y1n; Dx = X2n; Dy = Y2n; disp('12');
+        Bx = X1n; By = Y1n; Dx = X2n; Dy = Y2n;
     else
-        Dx = X1n; Dy = Y1n; Bx = X2n; By = Y2n; disp('21');
+        Dx = X1n; Dy = Y1n; Bx = X2n; By = Y2n;
     end
 elseif (maxDist == d13)
     if (minDist == d12 || minDist == d14)
-        Bx = X1n; By = Y1n; Dx = X3n; Dy = Y3n; disp('13');
+        Bx = X1n; By = Y1n; Dx = X3n; Dy = Y3n;
     else
-        Dx = X1n; Dy = Y1n; Bx = X3n; By = Y3n; disp('31');
+        Dx = X1n; Dy = Y1n; Bx = X3n; By = Y3n;
     end
 elseif (maxDist == d14)
     if (minDist == d13 || minDist == d12)
-        Bx = X1n; By = Y1n; Dx = X4n; Dy = Y4n; disp('14');
+        Bx = X1n; By = Y1n; Dx = X4n; Dy = Y4n;
     else
-        Dx = X1n; Dy = Y1n; Bx = X4n; By = Y4n; disp('41');
+        Dx = X1n; Dy = Y1n; Bx = X4n; By = Y4n;
     end
 elseif (maxDist == d23)
     if (minDist == d12 || minDist == d24)
-        Bx = X2n; By = Y2n; Dx = X3n; Dy = Y3n; disp('23');
+        Bx = X2n; By = Y2n; Dx = X3n; Dy = Y3n;
     else
-        Dx = X2n; Dy = Y2n; Bx = X3n; By = Y3n; disp('32');
+        Dx = X2n; Dy = Y2n; Bx = X3n; By = Y3n;
     end
 elseif (maxDist == d24)
     if (minDist == d12 || minDist == d23)
-        Bx = X2n; By = Y2n; Dx = X4n; Dy = Y4n; disp('24');
+        Bx = X2n; By = Y2n; Dx = X4n; Dy = Y4n;
     else
-        Dx = X2n; Dy = Y2n; Bx = X4n; By = Y4n; disp('42');
+        Dx = X2n; Dy = Y2n; Bx = X4n; By = Y4n;
     end
 elseif (maxDist == d34)
     if (minDist == d13 || minDist == d23)
-        Bx = X3n; By = Y3n; Dx = X4n; Dy = Y4n; disp('34');
+        Bx = X3n; By = Y3n; Dx = X4n; Dy = Y4n;
     else
-        Dx = X3n; Dy = Y3n; Bx = X4n; By = Y4n; disp('43');
+        Dx = X3n; Dy = Y3n; Bx = X4n; By = Y4n;
     end
 end
 if (Bx == 0 && By == 0 && Dx == 0 && Dy == 0)

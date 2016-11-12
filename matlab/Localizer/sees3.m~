@@ -81,21 +81,20 @@ elseif (ratio < 3.2)
             Cx = X3n; Cy = Y3n; Ax = X1n; Ay = Y1n; Bx = X2n; By = Y2n; disp('5B');
         end
     elseif (maxDist == d23)
-        if (minDist == d12)
+        if (minDist == 1)
             Cx = X2n; Cy = Y2n; Ax = X3n; Ay = Y3n; Bx = X1n; By = Y1n; disp('6A');
         else
             Cx = X3n; Cy = Y3n; Ax = X2n; Ay = Y2n; Bx = X1n; By = Y1n; disp('6B');
         end
     end
-    Mx = Cx + (Cx - Ax) * 0.5246;
-    My = Cy + (Cy - Ay) * 0.5246;
+    Mx = Cx + (Cx - Ax) * 0.5245;
+    My = Cy + (Cy - Ay) * 0.5245;
     BtoMx = Bx - Mx; BtoMy = By - My;
     center_x = Bx + BtoMx * 1.604;
     center_y = By + BtoMy * 1.604;
     theta = atan2((Bx - center_x),(By - center_y));
     x = - (center_x * cos(theta) - center_y * sin(theta));
     y = (center_x * sin(theta) + center_y * cos(theta));
-    x = 0; y = 0;
 else
     %Case in which C is missing: Max is BD, Min is AC
     if (maxDist == d12)

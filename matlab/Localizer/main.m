@@ -1,4 +1,5 @@
 figure(1)
+clf
 hold on
 axis equal
 bot_r = 3.81; %bot radius in cm
@@ -10,7 +11,6 @@ rectangle('Position',[-5 29.5 5 59.7])
 rectangle('Position',[230 29.5 5 59.7])
 
 scaleFactor = .2;
-
 load('C.mat');
 for i = 1: length(rawStarData)
     X1 = rawStarData(i,1); X2 = rawStarData(i,2);
@@ -34,9 +34,8 @@ for i = 1: length(rawStarData)
     if (x ~= 0 && y ~= 0)
         x = x * scaleFactor + 230/2;
         y = y * scaleFactor + 120/2;
-        plot(x, y, 'mo', 'MarkerSize', bot_r*2);
-        quiver(x, y, bot_r * cos(t), bot_r * sin(t));
+        plot(x, y, 'o', 'MarkerFaceColor', 'm', 'MarkerEdgeColor', 'm', 'MarkerSize', bot_r * 2);
+        line([x, (bot_r * cos(t) + x)], [y (bot_r * sin(t) + y)]);
     end
-    pause(0.001);
 end
 hold off
