@@ -1,4 +1,4 @@
-figure
+figure(1)
 hold on
 axis equal
 bot_r = 3.81; %bot radius in cm
@@ -8,6 +8,8 @@ rectangle('Position',[0 0 230 120],'Curvature',[59/230, 59/120])
 % Draw Goals
 rectangle('Position',[-5 29.5 5 59.7])
 rectangle('Position',[230 29.5 5 59.7])
+
+scaleFactor = .2;
 
 load('C.mat');
 for i = 1: length(rawStarData)
@@ -30,8 +32,8 @@ for i = 1: length(rawStarData)
         [x, y, t] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4);
     end
     if (x ~= 0 && y ~= 0)
-        x = x + 230/2;
-        y = y + 120/2;
+        x = x * scaleFactor + 230/2;
+        y = y * scaleFactor + 120/2;
         plot(x, y, 'mo', 'MarkerSize', bot_r*2);
         quiver(x, y, bot_r * cos(t), bot_r * sin(t));
     end

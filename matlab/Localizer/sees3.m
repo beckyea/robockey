@@ -1,14 +1,8 @@
 function [x, y, theta] = sees3(X1, Y1, X2, Y2, X3, Y3)
 
-thetaScaleFactor = 0.2;
-h = 487;
-
-X1n = h / tan((X1 - 512) * thetaScaleFactor / 512 + pi/2);
-Y1n = h / tan((Y1 - 384) * thetaScaleFactor / 384 + pi/2);
-X2n = h / tan((X2 - 512) * thetaScaleFactor / 512 + pi/2);
-Y2n = h / tan((Y2 - 384) * thetaScaleFactor / 384 + pi/2);
-X3n = h / tan((X3 - 512) * thetaScaleFactor / 512 + pi/2);
-Y3n = h / tan((Y3 - 384) * thetaScaleFactor / 384 + pi/2);
+X1n = X1 - 512; Y1n = Y1 - 384;
+X2n = X2 - 512; Y2n = Y2 - 384;
+X3n = X3 - 512; Y3n = Y3 - 384;
 
 d12 = (X2n - X1n)^2 + (Y2n - Y1n)^2;
 d13 = (X3n - X1n)^2 + (Y3n - Y1n)^2;
