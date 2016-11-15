@@ -9,6 +9,7 @@
 #define m_bus__
 
 #include "m_general.h"
+#include <util/twi.h>
 
 #define MAX_WAIT        1000
 #define INTERPACKET     10
