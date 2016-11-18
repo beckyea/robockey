@@ -4,7 +4,7 @@
 
 int posX, posY;
 double theta;
-unsigned int blobs[10];
+unsigned int blobs[12];
 
 void set4Pts(unsigned int x[], unsigned int y[]);
 void set3Pts(unsigned int x[], unsigned int y[]);
@@ -49,6 +49,7 @@ void set4Pts(unsigned int x[], unsigned int y[]) {
 	long minDist, maxDist, d12, d13, d14, d23, d24, d34;
 	char B, D;
 	unsigned int centerx, centery;
+	
 	d12 = pow((x[2] - x[1]), 2) + pow((y[2] - y[1]), 2);
 	d13 = pow((x[3] - x[1]), 2) + pow((y[3] - y[1]), 2);
 	d14 = pow((x[4] - x[1]), 2) + pow((y[4] - y[1]), 2);

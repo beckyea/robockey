@@ -24,6 +24,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
 #include <math.h>
 
 

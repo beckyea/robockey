@@ -1,45 +1,58 @@
 
 #include "m_general.h"
-#include "avr/interrupt.h"
-#include "m_bus.h"
-#include "m_rf.h"
 #include "m_usb.h"
 
 
-void init();
-unsigned int buffer[10];
+void init(void);
+unsigned int buffer1[10] = { 1000, 1, 50, 100, 120, 0, 0, 0, 0, 0 };
+unsigned int buffer2[10] = { 1000, 2, 150, 70, 120, 0, 0, 0, 0, 0 };
+unsigned int buffer3[10] = { 1000, 3, 75, 30, 120, 0, 0, 0, 0, 0 };
 
 int main(void) {
 	init();
 	while(1) {
-		m_usb_tx_uint(buffer[0]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[1]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[2]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[3]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[4]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[5]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[6]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[7]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[8]);
-		m_usb_tx_string(',');
-		m_usb_tx_uint(buffer[9]);
-		m_usb_tx_push();
+		m_usb_tx_uint(buffer1[0]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[1]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[2]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[3]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[4]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[5]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[6]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[7]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[8]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer1[9]); m_usb_tx_string(","); m_usb_tx_push();
 
+		m_usb_tx_uint(buffer2[0]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[1]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[2]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[3]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[4]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[5]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[6]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[7]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[8]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer2[9]); m_usb_tx_string(","); m_usb_tx_push();
 
+		m_usb_tx_uint(buffer3[0]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[1]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[2]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[3]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[4]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[5]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[6]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[7]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[8]); m_usb_tx_string(","); m_usb_tx_push();
+		m_usb_tx_uint(buffer3[9]); m_usb_tx_string(","); m_usb_tx_push();
 	}
 }
 
 void init(void) {
-	m_clockdivide(0); // Set system clock prescaler to 1 (16MHz)
-	m_bus_init(); //Initialize mBUS pins
+	m_clockdivide(6);
 	m_usb_init(); 
-	buffer = [1, 1, 100, 100, 100, 0, 0, 0, 0, 0]
+	m_red(ON);
+	while (!m_usb_isconnected()) {
+
+	}
+	m_green(ON);
+	m_red(OFF);
 }

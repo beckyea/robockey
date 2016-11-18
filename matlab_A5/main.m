@@ -11,7 +11,7 @@ rectangle('Position',[-5 29.5 5 59.7])
 rectangle('Position',[230 29.5 5 59.7])
 
 scaleFactor = .2;
-load('C.mat');
+load('A.mat');
 for i = 1: length(rawStarData)
     X1 = rawStarData(i,1); X2 = rawStarData(i,2);
     X3 = rawStarData(i,3); X4 = rawStarData(i,4);
