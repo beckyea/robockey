@@ -184,3 +184,14 @@ void setPosition(int centerx, int centery) {
 	posX = -(centerx * cos(theta) - centery * sin(theta));
 	posY = (centerx * sin(theta) + centery * cos(theta));
 }
+
+/* gets x as seen in unsigned bits */
+void getX() { return posX + 115; }
+
+/* gets y as seen in unsigned bits */
+void getY() { return posY + 60; }
+
+/* gets theta as seen in unsigned bits */
+void getT() { return theta * 100; }
+
+
