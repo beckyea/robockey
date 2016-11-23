@@ -2,19 +2,26 @@
 #include <math.h>
 #include "m_wii.h"
 
-int posX, posY;
+int posX, posY = 500;
 double theta;
 unsigned int blobs[12];
+char recievedWii;
 
 void set4Pts(unsigned int x[], unsigned int y[]);
 void set3Pts(unsigned int x[], unsigned int y[]);
 double findOrientation();
 void setPosition();
+char loc_readWii();
+void readStars();
+unsigned int loc_getX();
+unsigned int loc_getY();
+unsigned int loc_getT();
+char loc_getSide();
+
 
 /* Reads the Wii. Begins execution of localization */
-char readWii() {
-	char recievedWii;
-	//recievedWii = m_wii_read(blobs);
+char loc_readWii() {
+	recievedWii = m_wii_read(blobs);
 	if (recievedWii) { 
 		readStars(); 
 		// TODO: Something to send out position of stars
@@ -186,13 +193,18 @@ void setPosition(int centerx, int centery) {
 	posY = (centerx * sin(theta) + centery * cos(theta));
 }
 
-/* gets x as seen in unsigned bits */
-void getX() { return posX + 115; }
+/* Gets x as seen in unsigned bits */
+unsigned int loc_getX() { return posX + 115; }
 
-/* gets y as seen in unsigned bits */
-void getY() { return posY + 60; }
+/* Gets y as seen in unsigned bits */
+unsigned int loc_getY() { return posY + 60; }
 
-/* gets theta as seen in unsigned bits */
-void getT() { return theta * 100; }
+/* Gets theta as seen in unsigned bits */
+unsigned int loc_getT() { return theta * 100; }
 
-
+/* Determines side of court */
+char loc_getSide() { 
+	if (posX < 0 && posX > -115) { return 1; } // Left side
+	else if (posX < 115) { return 2; } // Right side
+	else { return 0; } // Error
+}
