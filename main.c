@@ -13,13 +13,9 @@ Digital (PWM) Pins from 2-13
 #include "m_usb.h"
 #include "m_bus.h"
 #include "m_rf.h"
-
+#define MOTOR_EN 0
 #define RIGHT 0
 #define LEFT 1
-
-
-#define MOTOR_EN 0
-
 
 void timer1_init(void);
 void init(void);
@@ -78,7 +74,7 @@ void timer1_init(void){
 
 void init(void){
 	// Set pins as outputs, what they connect from M2 to the red motor controller
-	set(DDRB,MOTOR_EN); //B0 --> A0
+	// set(DDRB,MOTOR_EN); //B0 --> A0
 	set(DDRB,1); //B1 --> D7
 	set(DDRB,2); //B2 --> D8
 	set(DDRB,3); //B3 --> D9
@@ -127,19 +123,19 @@ void left(void){
 }
 
 void stop(void){
-	clear(PORTB,MOTOR_EN);
+	// clear(PORTB,MOTOR_EN);
 	clear(PORTB,6);
 }
 
 ISR(TIMER1_COMPA_vect){    //PWM signal goes low
-	clear(PORTB,MOTOR_EN);
+	// clear(PORTB,MOTOR_EN);
 	//clear(PORTB,7);
 	clear(PORTB,5);
 	clear(PORTB,6);
 }
 
 ISR(TIMER1_COMPB_vect){   //PWM signal goes high
-	set(PORTB,MOTOR_EN);
+	// set(PORTB,MOTOR_EN);
 	//set(PORTB,7);
 	set(PORTB,5);
 	set(PORTB,6);
