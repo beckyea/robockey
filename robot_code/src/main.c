@@ -1,65 +1,88 @@
-
- /* Name: main.c
-* Author: <Adnan Jafferjee>
-* Copyright: <insert your copyright message here>
-* License: <insert your license reference here>
+/**
+* General Controller Class
+* Handles Play Commands, Driving, State of the Robot
 */
 #include "m_general.h"
-#include "avr/interrupt.h"
-#include "m_bus.h"
-#include "m_rf.h"
 #include "m_usb.h"
-#include "m_wii.h"
-#include "math.h"
+#include "m_rf.h"
+#include "m_bus.h"
+#include "initialization.h"
+#include "localization.h"
+#include "vals.h"
+#include "drive.h"
 
-int xOffset = 0; //
-int yOffset = 0;
+#define LED_FLASH_TIME 1000
 
-int x0 = (1024/2)-xOffset; //Offsets for pixel resolution of the Wii Sensor
-int y0 = (768/2)-yOffset;
+char scoreA = 0;
+char scoreB = 0;
+char inPlay = 1;
+enum color currTeam;
 
-double P0[2]={0,0}; // Hard-coding positions of stars in centimeter coordinate-frame
-double P1[2]={0,14.5};
-double P2[2]={11.655,8.741};
-double P3[2]={0,-14.5};
-double P4[2]={-10.563,2.483};
-double P_vert = 29.0; //Vertical difference between P1 and P3
+char buffer[10];
 
-unsigned int blobs[12]= {};
+void readBuffer();
 
-
-//Prototyping subroutines 
-void init(void);
-
-int main(void) {
- init();
-
-while(1) {
-	char = m_wii_read(blobs)
-	double x1 = blobs[0];
-	double y1 = blobs[1];
-	double x2 = blobs[3];
-	double y2 = blobs[4];
-	double x3 = blobs[6];
-	double y3 = blobs[7];
-	double x4 = blobs[9];
-	double y4 = blobs[10];
-
-	double QA = {x1-x0, y1-y0};
-	double QB = {x2-x0, y2-y0};
-	double QC = {x3-x0, y3-y0};
-	double QD = {x4-x0, y4-y0};
-  
-
-}
+// Main Function
+int main() {
+	init_all();
+	drive_init();
+	set(DDRE, 6); // Configure E6 for output -- Positioning LED, RED
+	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
+	m_clockdivide(4);
+	while (inPlay) {
+		loc_readWii();
+		goToPoint(0, 115);
+	}
+	return 0;
 }
 
-void init(void) {
- m_clockdivide(0); // Set system clock prescaler to 1 (16MHz)
- m_bus_init(); //Initialize mBUS pins
- // m_rf_open(CHANNEL,RXADDRESS,PACKET_LENGTH); //Open wireless comm.
- m_usb_init(); 
- char blobCheck = m_wii_open(void);
+// Reads the Buffer and Performs Appropriate Action
+void readBuffer() {
+	switch ((unsigned char) buffer[0]) {
+		case 0xA0 : // Communication Test
+			loc_readWii();
+			if (loc_getSide() == 1) { // Left Side - Display Red LED
+				set(PORTE, 6);
+				m_wait(LED_FLASH_TIME);
+				clear(PORTE, 6);
+			} else if (loc_getSide() == 2) { // Right Side - Display Blue LED
+				set(PORTC, 7);
+				m_wait(LED_FLASH_TIME);
+				clear(PORTC, 7);
+			} else {} // TODO - HANDLE THIS BECAUSE SOMETHING IS WRONG
+			break;
+		case 0xA1: // Play
+			loc_readWii();
+			currTeam = loc_getSide();
+			if (currTeam == RED) { set(PORTE, 6); } // Left Side
+			else if (currTeam == BLUE) { set(PORTC, 7); } // Right Side
+			else {}
+			inPlay = 1;
+			break;
+			// move in a noticeable way -- TODO: DRIVE COMMAND
+		case 0xA2: // Goal R
+			scoreA = buffer[1];
+			scoreB = buffer[2];
+			break;
+		case 0xA3: // Goal B
+			scoreA = buffer[1];
+			scoreB = buffer[2];
+			break;
+		case 0xA4: // Pause
+			inPlay = 0;
+			break;
+		case 0xA5: // Halftime
+			inPlay = 0;
+			break;
+		case 0xA6: // Game Over
+			inPlay = 0;
+			break;
+	}
+}
 
 
+// Interrupt to Handle mRF Communication
+ISR(INT2_vect) {
+	m_rf_read(buffer, PACKET_LENGTH);
+	readBuffer();
 }
