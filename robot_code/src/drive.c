@@ -9,7 +9,6 @@
 #include <math.h>
 
 #define MOTOR_PORT PORTB
-#define MOTOR_EN 0 
 #define LMOTOR_D 1 
 #define RMOTOR_D 2
 
@@ -23,55 +22,63 @@ void drive_init(void){
 
 // Drive Forward
 void fwd(void){
-	set(MOTOR_PORT, LMOTOR_D);
-	clear(MOTOR_PORT, RMOTOR_D);
+	set(PORTB,1); //pin D7 (A1 on H bridge)
+	set(PORTB,2); //pin D8 (B1 on H bridge)
+	clear(PORTB,4); //pin D4 (A2 on H bridge)
+	clear(PORTB,3); //pin D9 (B2 on H bridge)
 }
 
 // Drive Reverse
 void rev(void){
-	clear(MOTOR_PORT, LMOTOR_D);
-	clear(MOTOR_PORT, RMOTOR_D);
+	clear(PORTB,1); //pin D7 (A1 on H bridge)
+	clear(PORTB,2); //pin D8 (B1 on H bridge)
+	set(PORTB,4); //pin D4 (A2 on H bridge)
+	set(PORTB,3); //pin D9 (B2 on H bridge)
 }
 
 // Turn Right
 void right(void){
-	set(MOTOR_PORT, LMOTOR_D);
-	clear(MOTOR_PORT, RMOTOR_D);
+	clear(PORTB,1); //pin D7 (A1 on H bridge)
+	set(PORTB,2); //pin D8 (B1 on H bridge)
+	set(PORTB,4); //pin D4 (A2 on H bridge)
+	clear(PORTB,3); //pin D9 (B2 on H bridge)
 }
 
 // Turn Left
 void left(void){
-	clear(MOTOR_PORT, LMOTOR_D);
-	set(MOTOR_PORT, RMOTOR_D);
+	set(PORTB,1); //pin D7 (A1 on H bridge)
+	clear(PORTB,2); //pin D8 (B1 on H bridge)
+	clear(PORTB,4); //pin D4 (A2 on H bridge)
+	set(PORTB,3); //pin D9 (B2 on H bridge)
 }
 
 // Stop Bot
 void stop(void){
-	clear(MOTOR_PORT, MOTOR_EN);
-	OCR1B = OCR1A;
+	clear(PORTB,MOTOR_EN);
+	clear(PORTB,6);
 }
 
 // Go to point (x,y)
 void goToPoint(int x, int y) {
 	double thetaToPos;
-	thetaToPos = atan2(y - posY, x - posX);
-	if (theta - thetaToPos < 1) {
+	thetaToPos = (double) (atan2(x - posX, y - posY))- 3.1416/2;
+	if (thetaToPos < - 3.1416) { thetaToPos = thetaToPos + 3.1416*2; }
+	if (theta - thetaToPos > .5) {
 		right();
-	} else if (thetaToPos - theta > -1) {
+	} else if (thetaToPos - theta > .5) {
 		left();
 	} else if (x != posX || y != posY) { 
 		fwd(); 
 	} else { stop(); }
+	m_wait(3000);
+	m_usb_tx_int((int) (posX));
+	m_usb_tx_string("\t");
+	m_usb_tx_int((int) (posY));
+	m_usb_tx_string("\t");
+	m_usb_tx_int((int) (theta*1000));
+	m_usb_tx_string("\t");
+	m_usb_tx_int((int) (thetaToPos*1000));
+	m_usb_tx_string("\n");
 
 }
 
-ISR(TIMER1_COMPA_vect){    //PWM signal goes low 
-	m_red(TOGGLE);
-	clear(MOTOR_PORT, MOTOR_EN);
-	clear(MOTOR_PORT, 6);
-}
-
-ISR(TIMER1_COMPB_vect){   //PWM signal goes high
-	set(MOTOR_PORT, MOTOR_EN);
-	set(MOTOR_PORT, 6);
-}

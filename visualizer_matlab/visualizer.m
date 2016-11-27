@@ -2,6 +2,7 @@
 thetaShiftMult = 100;
 xShift = -115;
 yShift = -60;
+scaleFactor = .31;
 
 %% Configure Visualization
 figure(1)
@@ -25,48 +26,44 @@ B3 = [0 0 0];
 handle = serial('/dev/tty.usbmodem411','Baudrate', 9600, 'Parity','none','DataBits',8);
 %handle.InputBufferSize = 20;
 fclose(instrfind);
-buffer = zeros(9,1);
+buffer = zeros(11,1);
 bufferindex = 0;
 while true
     fopen(handle);
     num = str2num(fscanf(handle));
     for j = 1:length(num)
-        if (num(j) == 1000)
+        if (num(j) == 5555)
             bufferindex = 1;
         elseif (bufferindex >= 1)
             buffer(bufferindex) = num(j);
             bufferindex = bufferindex + 1;
         end
-        if (bufferindex == 9)
-            bufferindex = 0;
-            %% Handle Input
-            switch(buffer(1))
-                case(1) % offensive bot 1
-                    B1 = [ buffer(2), buffer(3), buffer(4) ];
-                    x = B1(1) + xShift + 230/2;
-                    y = B1(2) + yShift + 120/2;
-                    t = B1(3) / thetaShiftMult;
-                    plot(x, y, 'o', 'MarkerFaceColor', 'm' , 'MarkerSize', bot_r * 2);
-                    %plot(x, y, 'o', 'MarkerFaceColor', 'm' , ...
-                    %    'MarkerEdgeColor', 'm', 'MarkerSize', bot_r * 2);
-                    line([x, (bot_r * cos(t) + x)], [y, (bot_r * sin(t) + y)]);
-                case(2) % offensive bot 2
-                    B2 = [ buffer(2), buffer(3), buffer(4) ];
-                    x = B2(1) + xShift + 230/2;
-                    y = B2(2) + yShift  + 120/2;
-                    t = B2(3) / thetaShiftMult;
-                    plot(x, y, 'o', 'MarkerFaceColor', 'c' , ...
-                        'MarkerSize', bot_r * 2);
-                    line([x, (bot_r * cos(t) + x)], [y, (bot_r * sin(t) + y)]);
-                case(3) % goalie bot
-                    B3 = [ buffer(2), buffer(3), buffer(4) ];
-                    x = B3(1) + xShift + 230/2;
-                    y = B3(2) + yShift + 120/2;
-                    t = B3(3) / thetaShiftMult;
-                    plot(x, y, 'o', 'MarkerFaceColor', 'g' , ...
-                        'MarkerSize', bot_r * 2);
-                    line([x, (bot_r * cos(t) + x)], [y, (bot_r * sin(t) + y)]);
+        if (bufferindex == 12)
+            X1 = buffer(1); Y1 = buffer(2);
+            X2 = buffer(3); Y2 = buffer(4);
+            X3 = buffer(5); Y3 = buffer(6);
+            X4 = buffer(7); Y4 = buffer(8);
+            xp = buffer(10); yp = buffer(11);
+            tp = buffer(9);
+            if (X1 == 1023 && X2 ~= 1023 && X3 ~= 1023 && X4 ~= 1023)
+                [x, y, t] = sees3(X2, Y2, X3, Y3, X4, Y4);
+            elseif (X1 ~= 1023 && X2 == 1023 && X3 ~= 1023 && X4 ~= 1023)
+                [x, y, t] = sees3(X1, Y1, X3, Y3, X4, Y4);
+            elseif (X1 ~= 1023 && X2 ~= 1023 && X3 == 1023 && X4 ~= 1023)
+                [x, y, t] = sees3(X1, Y1, X2, Y2, X4, Y4);
+            elseif (X1 ~= 1023 && X2 ~= 1023 && X3 ~= 1023 && X4 == 1023)
+                [x, y, t] = sees3(X1, Y1, X2, Y2, X3, Y3);
+            elseif (X1 == 1023 || X2 == 1023 || X3 == 1023 || X4 == 1023)
+                disp('2 or fewer stars');
+                x = 0; y = 0;
+            else
+                [x, y, t] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4);
             end
+            disp([xp yp t tp/1000])
+            x = x * scaleFactor + 230/2;
+            y = y * scaleFactor + 120/2;
+            plot(x, y, 'o', 'MarkerFaceColor', 'm' , 'MarkerSize', bot_r * 2);
+            
             drawnow
         end
     end

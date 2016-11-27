@@ -92,10 +92,22 @@ void init(void){
 }
 
 void test(void){
-	set(PORTB,1); //pin D7 (A1 on H bridge)
-	clear(PORTB,2); //pin D8 (B1 on H bridge)
-	clear(PORTB,4); //pin D4 (A2 on H bridge)
-	set(PORTB,3); //pin D9 (B2 on H bridge)
+		fwd();
+		m_wait(7000);
+		stop();
+		m_wait(15000);
+		rev();
+		m_wait(7000);
+		stop();
+		m_wait(15000);
+		left();
+		m_wait(7000);
+		stop();
+		m_wait(15000);
+		right();
+		m_wait(7000);
+		stop();
+		m_wait(15000);
 }
 
 void fwd(void){

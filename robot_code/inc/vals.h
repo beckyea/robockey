@@ -9,6 +9,7 @@
 #define ROBOT_ADDRESS 0x48
 #define CHANNEL 1
 #define PACKET_LENGTH 10
+#define MOTOR_EN 0
 
 extern int posX;
 extern int posY;

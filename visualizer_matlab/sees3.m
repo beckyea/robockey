@@ -37,7 +37,9 @@ if (ratio < 2.0)
     DtoMx = Dx - Mx; DtoMy = Dy - My;
     center_x = Mx - DtoMx * 0.273;
     center_y = My - DtoMy * 0.273;
-    theta = atan2((Dy - center_y),(Dx - center_x));
+    theta = atan2((center_x - Dx),(center_y - Dy));
+    x = - (center_x * cos(theta) - center_y * sin(theta));
+    y = (center_x * sin(theta) + center_y * cos(theta));
 elseif (ratio > 4.0)
     % Case in which A is missing: Max is BD, Min is BC
     if (maxDist == d12)
@@ -61,7 +63,9 @@ elseif (ratio > 4.0)
     end
     center_x = (Bx + Dx) / 2;
     center_y = (By + Dy) / 2;
-    theta = atan2((Dy - By),(Dx - Bx));
+    theta = atan2((Bx - Dx),(By - Dy));
+    x = -(center_x * cos(theta) - center_y * sin(theta));
+    y = (center_x * sin(theta) + center_y * cos(theta));
 elseif (ratio < 3.2)
     % Case in which D is missing: Max is AC, Min is BC
     if (maxDist == d12)
@@ -88,7 +92,10 @@ elseif (ratio < 3.2)
     BtoMx = Bx - Mx; BtoMy = By - My;
     center_x = Bx + BtoMx * 1.604;
     center_y = By + BtoMy * 1.604;
-    theta = atan2((center_y - By),(center_x - Bx));
+    theta = atan2((Bx - center_x),(By - center_y));
+    x = - (center_x * cos(theta) - center_y * sin(theta));
+    y = (center_x * sin(theta) + center_y * cos(theta));
+    x = 0; y = 0;
 else
     %Case in which C is missing: Max is BD, Min is AC
     if (maxDist == d12)
@@ -112,20 +119,20 @@ else
     end
     center_x = (Bx + Dx) / 2;
     center_y = (By + Dy) / 2;
-    theta = atan2((Dy - By),(Dx - Bx));
+    theta = atan2((Bx - Dx),(By - Dy));
+    x = -(center_x * cos(theta) - center_y * sin(theta));
+    y = (center_x * sin(theta) + center_y * cos(theta));
 end
 theta2 = -atan2(center_x, center_y);
 theta2 = theta2 - pi/2;
 if theta < - pi
     theta = theta + pi * 2;
 end
-if theta2 < - pi
-    theta2 = theta2 + pi * 2;
-end
 dist2cent = sqrt(center_x*center_x + center_y*center_y);
 abs_theta =  theta - theta2 - pi;
-
-x = dist2cent*cos(abs_theta);
-y = dist2cent*sin(abs_theta);
+%disp([theta abs_theta]);
+disp([center_x center_y]);
+x = -dist2cent*cos(abs_theta);
+y = -dist2cent*sin(abs_theta);
 %[x y]
 end
