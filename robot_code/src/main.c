@@ -31,11 +31,11 @@ int main() {
 	drive_init();
 	set(DDRC, 6); // Configure C6 for output -- Positioning LED, RED
 	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
-	m_clockdivide(5);
-	while (inPlay) {
+	m_clockdivide(4);
+	int foundGoal = 0;
+	while (inPlay && !foundGoal) {
 		loc_readWii();
-		//loc_readWii();
-		if (posX != 0 && posY != 0) { goToPoint(150, 0); }
+		foundGoal = goToPoint(106, -17);
 		
 	}
 	return 0;
@@ -103,7 +103,7 @@ ISR(INT2_vect) {
 	m_rf_read(buffer, PACKET_LENGTH);
 	readBuffer();
 }
-// Interrupt to Call mWii
-ISR(TIMER4_OVF_vect) {
-	loc_readWii();
-}
+// // Interrupt to Call mWii
+// ISR(TIMER4_OVF_vect) {
+// 	loc_readWii();
+// }

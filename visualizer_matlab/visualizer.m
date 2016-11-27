@@ -23,7 +23,7 @@ B2 = [0 0 0];
 B3 = [0 0 0];
 
 %% Initialize I/O
-handle = serial('/dev/tty.usbmodem411','Baudrate', 9600, 'Parity','none','DataBits',8);
+handle = serial('/dev/tty.usbmodem411','Baudrate', 9600, 'Parity','none');
 %handle.InputBufferSize = 20;
 fclose(instrfind);
 buffer = zeros(11,1);
@@ -43,7 +43,8 @@ while true
             X2 = buffer(3); Y2 = buffer(4);
             X3 = buffer(5); Y3 = buffer(6);
             X4 = buffer(7); Y4 = buffer(8);
-            xp = buffer(10); yp = buffer(11);
+            xp = 0; %buffer(10); yp = buffer(11);
+            yp = 0;
             tp = buffer(9);
             if (X1 == 1023 && X2 ~= 1023 && X3 ~= 1023 && X4 ~= 1023)
                 [x, y, t] = sees3(X2, Y2, X3, Y3, X4, Y4);
@@ -59,9 +60,9 @@ while true
             else
                 [x, y, t] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4);
             end
-            disp([xp yp t tp/1000])
             x = x * scaleFactor + 230/2;
             y = y * scaleFactor + 120/2;
+            disp([x y t tp/1000])
             plot(x, y, 'o', 'MarkerFaceColor', 'm' , 'MarkerSize', bot_r * 2);
             
             drawnow

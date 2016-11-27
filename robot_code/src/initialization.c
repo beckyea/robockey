@@ -25,11 +25,11 @@ void init_mwii(void) {
 		m_red(ON); // pause device until Wii is connected
 	}
 	m_red(OFF);
-	// Initialize Timer 4
-	set(TCCR4B, CS43); clear(TCCR4B, CS42); clear(TCCR4B, CS41); clear(TCCR4B, CS40); // clockspeed /64
-	clear(TCCR4D, WGM41); clear(TCCR4D, WGM40); // up to OCR4C
-	OCR4A = 255;
-	set(TIMSK4, TOIE4);
+	// // Initialize Timer 4
+	// set(TCCR4B, CS43); clear(TCCR4B, CS42); clear(TCCR4B, CS41); clear(TCCR4B, CS40); // clockspeed /64
+	// clear(TCCR4D, WGM41); clear(TCCR4D, WGM40); // up to OCR4C
+	// OCR4A = 255;
+	// set(TIMSK4, TOIE4);
 }
 
 // Initializes mRF Sesnsor

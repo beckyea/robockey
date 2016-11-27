@@ -70,14 +70,13 @@ if theta < -pi
 end
 theta2 = -atan2(center_x, center_y);
 theta2 = theta2 - pi/2;
-if theta < - pi
-    theta = theta + pi * 2;
+if theta2 < - pi
+    theta2 = theta2 + pi * 2;
 end
 dist2cent = sqrt(center_x*center_x + center_y*center_y);
 abs_theta =  theta - theta2 - pi;
 %disp([theta abs_theta]);
-disp([X1 Y1]);
 x = -dist2cent*cos(abs_theta);
 y = -dist2cent*sin(abs_theta);
-%[x y]
+disp([dist2cent abs_theta])
 end

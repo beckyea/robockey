@@ -8,8 +8,9 @@
 #define SQ(x) ((x) * (x))
 
 #define XSHIFT 535
-#define YSHIFT 370
+#define YSHIFT 380
 double PI = 3.14159;
+double scaleFactor = 0.31;
 
 unsigned int blobs[12];
 char recievedWii;
@@ -35,7 +36,7 @@ char loc_readWii() {
 		// m_usb_tx_uint(blobs[9]); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(blobs[10]); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(theta * 1000); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_string("\n"); m_usb_tx_push();
+		//m_usb_tx_string("\n"); m_usb_tx_push();
 		// TODO: Something to send out position of stars
 	}
 	return recievedWii;
@@ -50,16 +51,16 @@ void readStars() {
 	int i;
 	for (i = 0; i < 4; i++) {
 		if (blobs[i * 3] != 1023 && blobs[i * 3 + 1] != 1023) {
-			x_vals[valCount] = blobs[i * 3] - XSHIFT;
-			y_vals[valCount] = blobs[i * 3 + 1] - YSHIFT;
+			x_vals[valCount] = (int)(blobs[i * 3] - XSHIFT);
+			y_vals[valCount] = (int)(blobs[i * 3 + 1] - YSHIFT);
 			valCount++;
 		}
 	}
 	if (valCount == 4) { set4Pts(x_vals, y_vals); }
 	else if (valCount == 3) { set3Pts(x_vals, y_vals); }
-	//else if (valCount == 2) { m_usb_tx_string('2'); }
-	//else if (valCount == 3) { m_usb_tx_string('1'); }
-	//else { m_usb_tx_string('0'); }
+	else if (valCount == 2) { m_usb_tx_int(2); }
+	else if (valCount == 3) { m_usb_tx_int(1); }
+	else { m_usb_tx_int(0); }
 }
 
 /* Sets the center of the field in the local frame of the robot
@@ -76,9 +77,17 @@ void set4Pts(int x[], int y[]) {
 	d24 = SQ(x[3] - x[1]) + SQ(y[3] - y[1]);
 	d34 = SQ(x[3] - x[2]) + SQ(y[3] - y[2]);
 	// calculate maximum distance between blobs
-	maxDist =  MAX(d12, MAX(d13, MAX(d14, MAX(d23, MAX(d24, d34)))));
+	maxDist =  d12     > d13 ?  d12     : d13;
+	maxDist =  maxDist > d14 ?  maxDist : d14;
+	maxDist =  maxDist > d23 ?  maxDist : d23;
+	maxDist =  maxDist > d24 ?  maxDist : d24;
+	maxDist =  maxDist > d34 ?  maxDist : d34;
 	// calcualte minimum distance between blobs
-	minDist =  MIN(d12, MIN(d13, MIN(d14, MIN(d23, MIN(d24, d34)))));
+	minDist =  d12     < d13 ?  d12     : d13;
+	minDist =  minDist < d14 ?  minDist : d14;
+	minDist =  minDist < d23 ?  minDist : d23;
+	minDist =  minDist < d24 ?  minDist : d24;
+	minDist =  minDist < d34 ?  minDist : d34;
 	// compare distance values to find B & D
 	if (maxDist == d12) {
     	if (minDist == d13 || minDist == d14) { B = 0; D = 1; } 
@@ -108,9 +117,9 @@ void set3Pts(int x[], int y[]) {
 	long minDist, maxDist, d12, d13, d23;
 	int A, B, C, D; A = B = C = D = 0;
 	int centerx, centery;
-	d12 = pow((x[1] - x[0]), 2) + pow((y[1] - y[0]), 2);
-	d13 = pow((x[2] - x[0]), 2) + pow((y[2] - y[0]), 2);
-	d23 = pow((x[2] - x[1]), 2) + pow((y[2] - y[1]), 2);
+	d12 = SQ(x[1] - x[0]) + SQ(y[1] - y[0]);
+	d13 = SQ(x[2] - x[0]) + SQ(y[2] - y[0]);
+	d23 = SQ(x[2] - x[1]) + SQ(y[2] - y[1]);
 	// calculate maximum distance between blobs
 	maxDist =  d12     > d13 ?  d12     : d13;
 	maxDist =  maxDist > d23 ?  maxDist : d23;
@@ -191,10 +200,19 @@ void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 	if (theta < -PI) { theta += 2 * PI; }
 	theta2 = -atan2(centerx, centery) - PI/2;
 	if (theta2 < -PI) { theta2 += 2 * PI; }
-	dist2center = sqrt(centerx*centerx + centery*centery);
+	dist2center = sqrt((centerx/10.0)*(centerx/10.0) + (centery/10.0)*(centery/10.0)) * 10.0;
 	theta2 = theta - theta2 - PI;
-	posX = -dist2center*cos(theta2);
-	posY = -dist2center*sin(theta2);
+	if (theta2 < -PI) { theta2 += 2 * PI; }
+	posX = -(int) (dist2center*cos(theta2) * scaleFactor);
+	posY = -(int) (dist2center*sin(theta2) * scaleFactor);
+	//m_usb_tx_int(posX); m_usb_tx_string(","); m_usb_tx_push();
+	//m_usb_tx_int(posY); m_usb_tx_string(","); m_usb_tx_push();
+	// if (posX == 0 && posY == 0) {
+	// 	m_usb_tx_string(","); m_usb_tx_push();
+	// 	m_usb_tx_int(centerx); m_usb_tx_string(","); m_usb_tx_push();
+	// 	m_usb_tx_int(centery); m_usb_tx_string(","); m_usb_tx_push();
+	// 	m_usb_tx_int(dist2center); m_usb_tx_string(","); m_usb_tx_push();
+	// }
 }
 
 /* Gets x as seen in unsigned bits */

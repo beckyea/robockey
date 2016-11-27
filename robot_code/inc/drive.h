@@ -23,7 +23,7 @@ void right(void);
 void stop(void);
 // FUNCTION: Stops the robot
 
-void goToPoint(int x, int y);
+int goToPoint(int x, int y);
 // FUNCTION: Drives the Robot to the Desired Point
 // INPUTS: 2 int values, designating x and y positions to be reached
 
