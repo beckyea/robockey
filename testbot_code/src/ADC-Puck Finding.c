@@ -10,7 +10,7 @@
 #include "m_rf.h"
 #include "m_usb.h"
 
-volatile int ADC_flag = 0;
+volatile int ADC_Flag = 0;
 int ADC_Channels[8] = {0,0,0,0,0,0,0,0}; //Array to hold phototransistor ADC values
 int ADC_Check=0; //Int to iterate through phototransistor channels
 
@@ -25,13 +25,13 @@ int main(void) {
 	set(ADCSRA,ADSC); // Start conversion
 	
 	while(1) {
-		if (ADC_flag!=0){  //If ADCs are being read
+		if (ADC_Flag!=0){  //If ADCs are being read
 			m_red(TOGGLE);
 			clear(ADCSRA,ADEN); // Disable ADC
 			m_usb_tx_string("\nF0:");
-			m_usb_tx_int(ADC_Channel[0]);
+			m_usb_tx_int(ADC_Channels[0]);
 			m_usb_tx_string("\tF1: ");
-			m_usb_tx_int(ADC_Channel[1]);
+			m_usb_tx_int(ADC_Channels[1]);
 
 			ADC_Flag = 0;
 					set(ADCSRA,ADEN); // Re-enable ADC
@@ -52,7 +52,7 @@ int main(void) {
 	clear(ADMUX, REFS1);
 	set(ADCSRA, ADPS2); //Set Clock prescaler to /128 => ADC runs at 125kHz
 	set(ADCSRA, ADPS1); 
-	set(ADCSRA, ADPS20); 
+	set(ADCSRA, ADPS0); 
 	//Disable digital on ADC Pins
 	set(DIDR0,ADC0D); // F0
 	set(DIDR0,ADC1D); // F1
@@ -70,8 +70,8 @@ ISR(ADC_vect){ //Call Interrupt when conversion completes
 	clear(ADCSRA,ADEN);
 	ADC_Channels[ADC_Check]=ADC;
 	if(ADC_Check==7){   //If all channels read
-		ADC_Check == 0; 
-		ADC_Flag == 1; 
+		ADC_Check = 0; 
+		ADC_Flag = 1; 
 	}
 	else ADC_Check ++;
 	if(ADC_Check == 0){ // Set ADC to F0
