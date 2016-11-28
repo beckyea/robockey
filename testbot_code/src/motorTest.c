@@ -3,13 +3,17 @@
 #include "m_bus.h"
 #include "m_rf.h"
 
-#define RIGHT 0
-#define LEFT 1
 
-#define MOTOR PORTB
-#define MOTOR_EN 0 
-#define LMOTOR_D 1 
-#define RMOTOR_D 2
+
+//Connect ENABLE and PWM Pins of Motor Controller to +5V
+#define MOTOR_DRIVE PORTB
+#define LMOTOR_PWM 5
+#define RMOTOR_PWM 6
+#define LMOTOR_FORWARD 0 
+#define LMOTOR_REVERSE 1
+#define RMOTOR_FORWARD 2
+#define RMOTOR_REVERSE 3
+
 
 void timer1_init(void);
 void init(void);
@@ -33,7 +37,6 @@ int main(void){
 
 void timer1_init(void){
 	//Timer 1 config
-	set(DDRB,6); //Set B6 to output
 	set(TCCR1B,WGM13); //Set to mode 15 (up to OCR1A)
 	set(TCCR1B,WGM12); // ^
 	set(TCCR1A,WGM11); // ^
@@ -50,37 +53,44 @@ void timer1_init(void){
 }
 
 void init(void){ 
-	set(DDRB,MOTOR_EN); // Define output pins for Motor Control
-	set(DDRB,LMOTOR_D);
-	set(DDRB,RMOTOR_D);
-	set(DDRB,6);
+	set(DDRB,LMOTOR_FORWARD); //Set Motor Pins to Output
+	set(DDRB,LMOTOR_REVERSE);
+	set(DDRB,RMOTOR_FORWARD);
+	set(DDRB,RMOTOR_REVERSE);
 	sei();//enable global interrupts
 	m_clockdivide(0);
 }
 
 void fwd(void){
-	set(MOTOR,LMOTOR_D);
-	clear(MOTOR,RMOTOR_D);
+	set(MOTOR_DRIVE,LMOTOR_FORWARD);
+	set(MOTOR_DRIVE,RMOTOR_FORWARD);
+	clear(MOTOR_DRIVE,LMOTOR_REVERSE);
+	clear(MOTOR_DRIVE,RMOTOR_REVERSE);
 }
 
 void rev(void){
-	clear(MOTOR,LMOTOR_D);
-	clear(MOTOR,RMOTOR_D);
+	clear(MOTOR_DRIVE,LMOTOR_FORWARD);
+	clear(MOTOR_DRIVE,RMOTOR_FORWARD);
+	set(MOTOR_DRIVE,LMOTOR_REVERSE);
+	set(MOTOR_DRIVE,RMOTOR_REVERSE);
 }
 
 void right(void){
-	set(MOTOR,LMOTOR_D);
-	clear(MOTOR,RMOTOR_D);
+	set(MOTOR_DRIVE,LMOTOR_FORWARD);
+	clear(MOTOR_DRIVE,RMOTOR_FORWARD);
+	clear(MOTOR_DRIVE,LMOTOR_REVERSE);
+	set(MOTOR_DRIVE,RMOTOR_REVERSE);
 }
 
 void left(void){
-	clear(MOTOR,LMOTOR_D);
-	set(MOTOR,RMOTOR_D);
+	clear(MOTOR_DRIVE,LMOTOR_FORWARD);
+	set(MOTOR_DRIVE,RMOTOR_FORWARD);
+	set(MOTOR_DRIVE,LMOTOR_REVERSE);
+	clear(MOTOR_DRIVE,RMOTOR_REVERSE);
 }
 
 void stop(void){
-	clear(MOTOR,MOTOR_EN);
-	OCR1B = OCR1A;
+	OCR1A
 }
 
 ISR(TIMER1_COMPA_vect){    //PWM signal goes low 
