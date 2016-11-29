@@ -12,11 +12,7 @@ void init_all (enum Bot bot) {
 	m_usb_init();
 	m_bus_init();
 	sei();
-<<<<<<< Updated upstream
 	init_setRobot(bot);
-=======
-	m_disableJTAG();
->>>>>>> Stashed changes
 	init_mwii();
 	init_mrf();
 	init_driver();
@@ -36,6 +32,9 @@ void init_mwii(void) {
 void init_mrf(void) {
 	m_rf_open(CHANNEL, ROBOT_ADDRESS, PACKET_LENGTH);
 }
+
+// Initializes for Puck Finding
+
 
 // Initializes Timer 1, pins for Motor Output
 void init_driver(void) {

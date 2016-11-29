@@ -1,7 +1,6 @@
 #include "vals.h"
 #include "localization.h"
 #include "m_usb.h"
-<<<<<<< Updated upstream
 #include <math.h>
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -12,8 +11,6 @@
 #define YSHIFT 380
 double PI = 3.14159;
 double scaleFactor = 0.31;
-=======
->>>>>>> Stashed changes
 
 unsigned int blobs[12];
 char recievedWii;
@@ -29,7 +26,6 @@ char loc_readWii() {
 	recievedWii = m_wii_read(blobs);
 	if (recievedWii) { 
 		readStars(); 
-<<<<<<< Updated upstream
 		// UNCOMMENT BELOW TO USE VISUALIZER
 		// m_usb_tx_uint(5555); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(blobs[0]); m_usb_tx_string(","); m_usb_tx_push();
@@ -41,18 +37,6 @@ char loc_readWii() {
 		// m_usb_tx_uint(blobs[9]); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(blobs[10]); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_string("\n"); m_usb_tx_push();
-=======
-		m_usb_tx_uint(blobs[0]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_uint(blobs[1]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_uint(blobs[3]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_uint(blobs[4]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_uint(blobs[6]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_uint(blobs[7]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_uint(blobs[9]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_uint(blobs[10]); m_usb_tx_string(","); m_usb_tx_push();
-		m_usb_tx_string("\n"); m_usb_tx_push();
-		// TODO: Something to send out position of stars
->>>>>>> Stashed changes
 	}
 	return recievedWii;
 }
@@ -71,20 +55,11 @@ void readStars() {
 			valCount++;
 		}
 	}
-<<<<<<< Updated upstream
 	if (valCount == 4) { set4Pts(x_vals, y_vals); }
-	else if (valCount == 3) { set3Pts(x_vals, y_vals); m_usb_tx_string("\n");}
+	else if (valCount == 3) { set3Pts(x_vals, y_vals); }
 	else if (valCount == 2) { }//m_usb_tx_int(2); m_usb_tx_string("\n");}
 	else if (valCount == 3) { }//m_usb_tx_int(1); m_usb_tx_string("\n");}
 	else { }//m_usb_tx_int(0); }
-=======
-	//if (valCount == 0) { set4Pts(x_vals, y_vals); }
-	//else if (valCount == 1) { set3Pts(x_vals, y_vals); }
-	//else if (valCount == 2) { m_usb_tx_string('2'); }
-	//else if (valCount == 3) { m_usb_tx_string('1'); }
-	//else { m_usb_tx_string('0'); }
->>>>>>> Stashed changes
-}
 
 /* Sets the center of the field in the local frame of the robot
    Defines the robot's distance (unscaled) from the center of the frame */
@@ -222,7 +197,6 @@ void set3Pts(int x[], int y[]) {
 
 
 /* Determines orientation of the puck given two input positions. */
-<<<<<<< Updated upstream
 void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 	double theta2, dist2center;
 	theta = atan2((Dy - By), (Dx - Bx)) - PI/2;
@@ -238,16 +212,6 @@ void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 	// m_usb_tx_string("\t");
 	// m_usb_tx_int((int) (posY));
 	// m_usb_tx_string("\n");
-=======
-double findOrientation(int Bx, int By, int Dx, int Dy) {
-	return atan2((Bx - Dx), (By - Dy));
-}
-
-/* Sets position of the robot in coordinates relative to the global frame */
-void setPosition(int centerx, int centery) {
-	posX = centerx * cos(theta) - centery * sin(theta);
-	posY = centerx * sin(theta) + centery * cos(theta);
->>>>>>> Stashed changes
 }
 
 /* Gets x as seen in unsigned bits */
