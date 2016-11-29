@@ -6,9 +6,10 @@
 #include "initialization.h"
 #include "vals.h"
 
+char ROBOT_ADDRESS = (char) (0x00);
+
 // Initializes all Subsystems
 void init_all (enum Bot bot) {
-	ROBOT_ADDRESS = (char) (0x00);
 	m_usb_init();
 	m_bus_init();
 	sei();
@@ -34,7 +35,29 @@ void init_mrf(void) {
 }
 
 // Initializes for Puck Finding
+void init_adc(void) {
+	m_disableJTAG(); 
+	clear(ADMUX, REFS0); // Make Vcc the reference voltage
+	set(ADMUX, REFS1);
+	set(ADCSRA, ADPS2); //Set Clock prescaler to /128 => ADC runs at 125kHz
+	set(ADCSRA, ADPS1); 
+	set(ADCSRA, ADPS0); 
+	//Disable digital on ADC Pins
+	set(DIDR0,ADC0D); // F0
+	set(DIDR0,ADC1D); // F1
+	set(DIDR0,ADC4D); // F4
+	set(DIDR0,ADC5D); // F5
+	set(DIDR0,ADC6D); // F6
+	set(DIDR0,ADC7D); // F7
+	set(DIDR2,ADC8D); // D4
+	set(DIDR2,ADC9D); // D6
+	set(ADCSRA,ADIE); //Enable ADC Interrupt Flag
+	clear(ADCSRA,ADATE); // Disable free-running Mode
+	
+	set(ADCSRA,ADEN); //Enable ADC
+	set(ADCSRA,ADSC); // Start conversion
 
+}
 
 // Initializes Timer 1, pins for Motor Output
 void init_driver(void) {

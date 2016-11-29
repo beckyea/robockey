@@ -19,6 +19,8 @@ char inPlay = 0;
 enum Color currTeam;
 
 char buffer[10];
+
+// Initialize Global Variables stored in vals.h
 int posX = 0;
 int posY = 0;
 double theta = 0.0;
@@ -35,6 +37,7 @@ int main() {
 	int foundGoal = 0;
 	while (inPlay && !foundGoal) {
 		loc_readWii();
+		puck_getADCValues();
 		foundGoal = goToPoint(106, -17);
 	}
 	while (!inPlay) {
