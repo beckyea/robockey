@@ -60,6 +60,7 @@ void readStars() {
 	else if (valCount == 2) { }//m_usb_tx_int(2); m_usb_tx_string("\n");}
 	else if (valCount == 3) { }//m_usb_tx_int(1); m_usb_tx_string("\n");}
 	else { }//m_usb_tx_int(0); }
+}
 
 /* Sets the center of the field in the local frame of the robot
    Defines the robot's distance (unscaled) from the center of the frame */
