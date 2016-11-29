@@ -35,10 +35,15 @@ int main() {
 	int foundGoal = 0;
 	while (inPlay && !foundGoal) {
 		loc_readWii();
+<<<<<<< Updated upstream
 		foundGoal = goToPoint(106, -17);
 	}
 	while (!inPlay) {
 		stop();
+=======
+		//goToPoint(0, 115);
+		m_wait(100);
+>>>>>>> Stashed changes
 	}
 	return 0;
 }

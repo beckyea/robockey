@@ -12,7 +12,11 @@ void init_all (enum Bot bot) {
 	m_usb_init();
 	m_bus_init();
 	sei();
+<<<<<<< Updated upstream
 	init_setRobot(bot);
+=======
+	m_disableJTAG();
+>>>>>>> Stashed changes
 	init_mwii();
 	init_mrf();
 	init_driver();
@@ -23,9 +27,9 @@ void init_mwii(void) {
 	int wiiConnected;
 	wiiConnected = m_wii_open();
 	while (!wiiConnected) {
-		m_red(ON); // pause device until Wii is connected
+		m_green(ON); // pause device until Wii is connected
 	}
-	m_red(OFF);
+	m_green(OFF);
 }
 
 // Initializes mRF Sesnsor

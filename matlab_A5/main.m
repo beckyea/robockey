@@ -11,8 +11,13 @@ rectangle('Position',[-5 29.5 5 59.7])
 rectangle('Position',[230 29.5 5 59.7])
 
 scaleFactor = .2;
+<<<<<<< Updated upstream
 load('C.mat');
 for i = 380:383%1: length(rawStarData)
+=======
+%load('A.mat');
+for i = 1 : length(rawStarData)
+>>>>>>> Stashed changes
     X1 = rawStarData(i,1); X2 = rawStarData(i,2);
     X3 = rawStarData(i,3); X4 = rawStarData(i,4);
     Y1 = rawStarData(i,5); Y2 = rawStarData(i,6);
@@ -36,10 +41,11 @@ for i = 380:383%1: length(rawStarData)
         [x, y, t] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4);
     end
     if (x ~= 0 && y ~= 0)
-        x = x * scaleFactor + 230/2;
-        y = y * scaleFactor + 120/2;
+        x = x + 230/2;
+        y = y + 120/2;
         plot(x, y, 'o', 'MarkerFaceColor', 'm', 'MarkerEdgeColor', 'm', 'MarkerSize', bot_r * 2);
         line([x, (bot_r * cos(t) + x)], [y (bot_r * sin(t) + y)]);
+        pause(0.001);
     end
     pause(1);
 end
