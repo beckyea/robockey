@@ -11,12 +11,12 @@
 #include "vals.h"
 #include "drive.h"
 
-#define LED_FLASH_TIME 1000
+#define LED_FLASH_TIME 50
 
 char scoreA = 0;
 char scoreB = 0;
-char inPlay = 1;
-enum color currTeam;
+char inPlay = 0;
+enum Color currTeam;
 
 char buffer[10];
 int posX = 0;
@@ -27,7 +27,7 @@ void readBuffer();
 
 // Main Function
 int main() {
-	init_all();
+	init_all(OFF1);
 	drive_init();
 	set(DDRC, 6); // Configure C6 for output -- Positioning LED, RED
 	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
@@ -36,7 +36,9 @@ int main() {
 	while (inPlay && !foundGoal) {
 		loc_readWii();
 		foundGoal = goToPoint(106, -17);
-		
+	}
+	while (!inPlay) {
+		stop();
 	}
 	return 0;
 }
@@ -61,10 +63,10 @@ void readBuffer() {
 			currTeam = loc_getSide();
 			if (currTeam == RED) { set(PORTC, 6); } // Left Side
 			else if (currTeam == BLUE) { set(PORTC, 7); } // Right Side
-			else {}
+			else { set(PORTC, 7); }
+			fwd(); m_wait(500); rev(); m_wait(500); stop();
 			inPlay = 1;
 			break;
-			// move in a noticeable way -- TODO: DRIVE COMMAND
 		case 0xA2: // Goal R
 			scoreA = buffer[1];
 			scoreB = buffer[2];
@@ -100,10 +102,7 @@ ISR(TIMER1_COMPB_vect){   //PWM signal goes high
 
 // Interrupt to Handle mRF Communication
 ISR(INT2_vect) {
+	m_usb_tx_string("a"); m_usb_tx_push();
 	m_rf_read(buffer, PACKET_LENGTH);
 	readBuffer();
 }
-// // Interrupt to Call mWii
-// ISR(TIMER4_OVF_vect) {
-// 	loc_readWii();
-// }

@@ -26,6 +26,7 @@ char loc_readWii() {
 	recievedWii = m_wii_read(blobs);
 	if (recievedWii) { 
 		readStars(); 
+		// UNCOMMENT BELOW TO USE VISUALIZER
 		// m_usb_tx_uint(5555); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(blobs[0]); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(blobs[1]); m_usb_tx_string(","); m_usb_tx_push();
@@ -35,9 +36,7 @@ char loc_readWii() {
 		// m_usb_tx_uint(blobs[7]); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(blobs[9]); m_usb_tx_string(","); m_usb_tx_push();
 		// m_usb_tx_uint(blobs[10]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(theta * 1000); m_usb_tx_string(","); m_usb_tx_push();
-		//m_usb_tx_string("\n"); m_usb_tx_push();
-		// TODO: Something to send out position of stars
+		// m_usb_tx_string("\n"); m_usb_tx_push();
 	}
 	return recievedWii;
 }
@@ -57,10 +56,10 @@ void readStars() {
 		}
 	}
 	if (valCount == 4) { set4Pts(x_vals, y_vals); }
-	else if (valCount == 3) { set3Pts(x_vals, y_vals); }
-	else if (valCount == 2) { m_usb_tx_int(2); }
-	else if (valCount == 3) { m_usb_tx_int(1); }
-	else { m_usb_tx_int(0); }
+	else if (valCount == 3) { set3Pts(x_vals, y_vals); m_usb_tx_string("\n");}
+	else if (valCount == 2) { }//m_usb_tx_int(2); m_usb_tx_string("\n");}
+	else if (valCount == 3) { }//m_usb_tx_int(1); m_usb_tx_string("\n");}
+	else { }//m_usb_tx_int(0); }
 }
 
 /* Sets the center of the field in the local frame of the robot
@@ -143,6 +142,7 @@ void set3Pts(int x[], int y[]) {
 		My = y[C] + (y[C] - y[A]) * 0.5245;
 		centerx = Mx - (x[D] + (x[D] - Mx) * 0.273);
 		centery = My - (y[D] + (y[D] - My) * 0.273);
+		m_usb_tx_string("B");
 		findOrientation(centerx, centerx, x[D], y[D], centerx, centery);
 	} else if (ratio > 4.0) { // A missing, Max: BD, Min: BC
 		if (maxDist == d12) {
@@ -157,8 +157,9 @@ void set3Pts(int x[], int y[]) {
 		}
 		centerx = (x[B] + x[D]) / 2;
 		centery = (y[B] + y[D]) / 2;
+		m_usb_tx_string("A");
 		findOrientation(x[B], y[B], x[D], y[D], centerx, centery);
-	} else if (ratio < 3.2) { // D missing, Max: AC, Min: BC
+	} else if ((long)(maxDist*maxDist/minDist) < 2200) { // D missing, Max: AC, Min: BC
 		if (maxDist == d12) {
 			if (minDist == d13) { A = 1; B = 2; C = 0; }
 			else { A = 0; B = 2; C = 1; }
@@ -175,7 +176,8 @@ void set3Pts(int x[], int y[]) {
 		centerx = Mx - (x[B] + (x[B] - Mx) * 1.604);
 		centery = My - (y[B] + (y[B] - My) * 1.604);
 		findOrientation(centerx, centerx, x[D], y[D],  centerx, centery);
-	} else { // C missing, Max: BD, Min: AC
+		m_usb_tx_string("D");
+	} else { // C missing, Max: BD, Min: AB
 		if (maxDist == d12) { 
 			if (minDist == d13) { B = 0; D = 1; }
 			else { B = 1; D = 0; }
@@ -188,8 +190,10 @@ void set3Pts(int x[], int y[]) {
 		}
 		centerx = (x[B] + x[D]) / 2;
 		centery = (y[B] + y[D]) / 2;
+		m_usb_tx_string("C");
 		findOrientation(x[B], y[B], x[D], y[D], centerx, centery);
 	}
+	m_usb_tx_string("\n");
 }
 
 
@@ -205,14 +209,10 @@ void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 	if (theta2 < -PI) { theta2 += 2 * PI; }
 	posX = -(int) (dist2center*cos(theta2) * scaleFactor);
 	posY = -(int) (dist2center*sin(theta2) * scaleFactor);
-	//m_usb_tx_int(posX); m_usb_tx_string(","); m_usb_tx_push();
-	//m_usb_tx_int(posY); m_usb_tx_string(","); m_usb_tx_push();
-	// if (posX == 0 && posY == 0) {
-	// 	m_usb_tx_string(","); m_usb_tx_push();
-	// 	m_usb_tx_int(centerx); m_usb_tx_string(","); m_usb_tx_push();
-	// 	m_usb_tx_int(centery); m_usb_tx_string(","); m_usb_tx_push();
-	// 	m_usb_tx_int(dist2center); m_usb_tx_string(","); m_usb_tx_push();
-	// }
+	// m_usb_tx_int((int) (posX));
+	// m_usb_tx_string("\t");
+	// m_usb_tx_int((int) (posY));
+	// m_usb_tx_string("\n");
 }
 
 /* Gets x as seen in unsigned bits */

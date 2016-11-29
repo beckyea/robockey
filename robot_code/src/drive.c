@@ -67,21 +67,21 @@ int goToPoint(int x, int y) {
 	if (abs(posX - x) < 10 && abs(posY - y) < 10) {
 		stop();
 		return 1;
-	} else if (abs(theta_temp - thetaToPos) > .5 ) {
+	} else if ((theta_temp - thetaToPos) > .5) {
 		right();
-	//} else if (thetaToPos - theta_temp > .1) {
-		//left();
+	} else if ((thetaToPos - theta_temp) > .5) {
+		left();
 	} else { fwd(); }
-	m_usb_tx_int((int) (posX));
-	m_usb_tx_string("\t");
-	m_usb_tx_int((int) (posY));
-	m_usb_tx_string("\t");
-	m_usb_tx_int((int) (theta_temp*1000));
-	m_usb_tx_string("\t");
-	m_usb_tx_int((int) (thetaToPos*1000));
-	m_usb_tx_string("\t");
-	m_usb_tx_int((int) ((theta_temp - thetaToPos)*100));
-	m_usb_tx_string("\n");
+	// m_usb_tx_int((int) (posX));
+	// m_usb_tx_string("\t");
+	// m_usb_tx_int((int) (posY));
+	// m_usb_tx_string("\t");
+	// m_usb_tx_int((int) (theta_temp*1000));
+	// m_usb_tx_string("\t");
+	// m_usb_tx_int((int) (thetaToPos*1000));
+	// m_usb_tx_string("\t");
+	// m_usb_tx_int((int) ((theta_temp - thetaToPos)*100));
+	// m_usb_tx_string("\n");
 	return 0;
 }
 

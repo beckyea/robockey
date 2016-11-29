@@ -78,5 +78,6 @@ abs_theta =  theta - theta2 - pi;
 
 x = dist2cent*cos(abs_theta);
 y = dist2cent*sin(abs_theta);
+disp([center_x center_y]);
 %[x y]
 end

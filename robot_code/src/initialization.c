@@ -6,13 +6,13 @@
 #include "initialization.h"
 #include "vals.h"
 
-char wiiConnected = 0;
-
 // Initializes all Subsystems
-void init_all (void) {
+void init_all (enum Bot bot) {
+	ROBOT_ADDRESS = (char) (0x00);
 	m_usb_init();
 	m_bus_init();
 	sei();
+	init_setRobot(bot);
 	init_mwii();
 	init_mrf();
 	init_driver();
@@ -20,16 +20,12 @@ void init_all (void) {
 
 // Initializes the mWii
 void init_mwii(void) {
+	int wiiConnected;
 	wiiConnected = m_wii_open();
 	while (!wiiConnected) {
 		m_red(ON); // pause device until Wii is connected
 	}
 	m_red(OFF);
-	// // Initialize Timer 4
-	// set(TCCR4B, CS43); clear(TCCR4B, CS42); clear(TCCR4B, CS41); clear(TCCR4B, CS40); // clockspeed /64
-	// clear(TCCR4D, WGM41); clear(TCCR4D, WGM40); // up to OCR4C
-	// OCR4A = 255;
-	// set(TIMSK4, TOIE4);
 }
 
 // Initializes mRF Sesnsor
@@ -62,5 +58,18 @@ void init_driver(void) {
 	set(TIMSK1,OCIE1B); //Enable interrupt when TCNT1 = OCR1B
 	OCR1A = 10000; // Default frequency: 800Hz
 	OCR1B = 8400; // ^ duty cycle: 50%
-	
+}
+
+void init_setRobot(enum Bot bot) {
+	switch(bot) {
+		case GOALIE:
+			ROBOT_ADDRESS = (char)0x18;
+			break;
+		case OFF1:
+			ROBOT_ADDRESS = (char)0x19;
+			break;
+		case OFF2:
+			ROBOT_ADDRESS = (char)0x1A;
+			break;
+	}
 }
