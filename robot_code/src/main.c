@@ -10,20 +10,27 @@
 #include "localization.h"
 #include "vals.h"
 #include "drive.h"
+#include "puckfind.h"
 
 #define LED_FLASH_TIME 50
 
-char scoreA = 0;
-char scoreB = 0;
-char inPlay = 0;
-enum Color currTeam;
+// INITIALIZE VALUES
+enum Color teamColor = RED;	// team color, from defined enum, either RED or BLUE
+char ROBOT_ADDRESS = 0x00;	// mRF address for robot communication
+int posX = 500;			// x position of robot, from -115 to 115
+int posY = 500;			// y position of robot, from -60 to 60
+double theta = 0;		// angle of robot from global frame
+char hasPuck = 0; 		// 0 if no puck, 1 if has puck
+char seesPuck = 0;		// 0 if does not see puck, 1 if sees puck
+double rangeVal = 0;	// higher number means closer to bot
+double puckAngle = 0;	// angle from the perpendicular 
+int defensiveGoalX = -115; // x position of goal you're defending
+int offensiveGoalX = 115; // x position of goal you're attacking
+int ourScore = 0;		// score of your team
+int otherScore = 0;		// score of the other team
+char inPlay = 0;  // 0 if initializing with Play Command, 0 for Testing
 
 char buffer[10];
-
-// Initialize Global Variables stored in vals.h
-int posX = 0;
-int posY = 0;
-double theta = 0.0;
 
 void readBuffer();
 
@@ -31,17 +38,16 @@ void readBuffer();
 int main() {
 	init_all(OFF1);
 	drive_init();
-	set(DDRC, 6); // Configure C6 for output -- Positioning LED, RED
-	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
 	m_clockdivide(4);
-	int foundGoal = 0;
-	while (inPlay && !foundGoal) {
-		loc_readWii();
-		puck_getADCValues();
-		foundGoal = goToPoint(106, -17);
-	}
-	while (!inPlay) {
-		stop();
+	setAmbient();
+	while (true) {
+		if (inPlay) {
+			loc_readWii();
+			puck_getADCValues();
+			goToPoint(offensiveGoalX, 0);
+		} else {
+			stop();
+		}
 	}
 	return 0;
 }
@@ -63,42 +69,50 @@ void readBuffer() {
 			break;
 		case 0xA1: // Play
 			loc_readWii();
-			currTeam = loc_getSide();
-			if (currTeam == RED) { set(PORTC, 6); } // Left Side
-			else if (currTeam == BLUE) { set(PORTC, 7); } // Right Side
+			teamColor = loc_getSide();
+			if (teamColor == RED) { set(PORTC, 6);  } // Left Side
+			else if (teamColor == BLUE) { set(PORTC, 7); } // Right Side
 			else { set(PORTC, 7); }
+			init_setGoal();
 			fwd(); m_wait(500); rev(); m_wait(500); stop();
 			inPlay = 1;
 			break;
 		case 0xA2: // Goal R
-			scoreA = buffer[1];
-			scoreB = buffer[2];
+			if (teamColor == RED) {
+				ourScore = buffer[1]; otherScore = buffer[2];
+				celebrate();
+			} else { ourScore = buffer[2]; otherScore = buffer[1]; }
+			inPlay = 0;
 			break;
 		case 0xA3: // Goal B
-			scoreA = buffer[1];
-			scoreB = buffer[2];
+			if (teamColor == BLUE) {
+				ourScore = buffer[2]; otherScore = buffer[1];
+				celebrate();
+			} else { ourScore = buffer[1]; otherScore = buffer[2]; }
+			inPlay = 0;
 			break;
 		case 0xA4: // Pause
 			inPlay = 0;
 			break;
 		case 0xA5: // Halftime
 			inPlay = 0;
+			if (teamColor == RED) { clear (PORTC, 6); set(PORTC, 7); teamColor = BLUE; }
+			else { clear (PORTC, 6); set(PORTC, 7); teamColor = RED; }
 			break;
 		case 0xA6: // Game Over
 			inPlay = 0;
 			break;
 	}
 }
+
 ISR(TIMER1_COMPA_vect){    //PWM signal goes low
 	clear(PORTB,MOTOR_EN);
-	//clear(PORTB,7);
 	clear(PORTB,5);
 	clear(PORTB,6);
 }
 
 ISR(TIMER1_COMPB_vect){   //PWM signal goes high
 	set(PORTB,MOTOR_EN);
-	//set(PORTB,7);
 	set(PORTB,5);
 	set(PORTB,6);
 }

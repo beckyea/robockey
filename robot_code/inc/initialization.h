@@ -4,13 +4,7 @@
 
 #ifndef initialization__
 #define initialization__
-
-#include "m_general.h"
 #include "vals.h"
-#include "m_usb.h"
-#include "m_bus.h"
-#include "m_rf.h"
-
 /* -----------------------------------------------------------------------------
    Public functions
 ----------------------------------------------------------------------------- */
@@ -27,6 +21,11 @@ void init_mrf(void);
 
 void init_driver(void);
 // FUNCTION: Initializes the pins for motor control
+
+void init_adc(void);
+
+void init_setGoal(void);
+// FUNCTION: Sets the coordinates of both goals as global variables
 
 void init_setRobot(enum Bot bot);
 // FUNCTION: Initializes the values and strategy of the bot

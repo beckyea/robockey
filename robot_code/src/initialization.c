@@ -4,19 +4,26 @@
 * Sets inputs, outputs, etc.
 */
 #include "initialization.h"
+#include "m_general.h"
+#include "m_usb.h"
+#include "m_wii.h"
+#include "m_bus.h"
+#include "m_rf.h"
+#include "puckfind.h"
 #include "vals.h"
-
-char ROBOT_ADDRESS = (char) (0x00);
 
 // Initializes all Subsystems
 void init_all (enum Bot bot) {
 	m_usb_init();
 	m_bus_init();
 	sei();
+	set(DDRC, 6); // Configure C6 for output -- Positioning LED, RED
+	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
 	init_setRobot(bot);
-	init_mwii();
-	init_mrf();
+	//init_mwii();
+	//init_mrf();
 	init_driver();
+	init_adc();
 }
 
 // Initializes the mWii
@@ -39,9 +46,7 @@ void init_adc(void) {
 	m_disableJTAG(); 
 	clear(ADMUX, REFS0); // Make Vcc the reference voltage
 	set(ADMUX, REFS1);
-	set(ADCSRA, ADPS2); //Set Clock prescaler to /128 => ADC runs at 125kHz
-	set(ADCSRA, ADPS1); 
-	set(ADCSRA, ADPS0); 
+	clear(ADCSRA, ADPS2); set(ADCSRA, ADPS1); set(ADCSRA, ADPS0); //Set Clock prescaler to /8 => ADC runs at 125kHz
 	//Disable digital on ADC Pins
 	set(DIDR0,ADC0D); // F0
 	set(DIDR0,ADC1D); // F1
@@ -53,10 +58,9 @@ void init_adc(void) {
 	set(DIDR2,ADC9D); // D6
 	set(ADCSRA,ADIE); //Enable ADC Interrupt Flag
 	clear(ADCSRA,ADATE); // Disable free-running Mode
-	
+
 	set(ADCSRA,ADEN); //Enable ADC
 	set(ADCSRA,ADSC); // Start conversion
-
 }
 
 // Initializes Timer 1, pins for Motor Output
@@ -98,4 +102,12 @@ void init_setRobot(enum Bot bot) {
 			ROBOT_ADDRESS = (char)0x1A;
 			break;
 	}
+}
+
+void init_setGoal() {
+	switch(teamColor) {
+		case(RED):  offensiveGoalX = 115;  defensiveGoalX = -115; break;
+		case(BLUE): offensiveGoalX = -115; defensiveGoalX = 115; break;
+	}
+
 }

@@ -2,6 +2,7 @@
 #include "localization.h"
 #include "m_usb.h"
 #include <math.h>
+#include "m_wii.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -9,7 +10,6 @@
 
 #define XSHIFT 535
 #define YSHIFT 380
-double PI = 3.14159;
 double scaleFactor = 0.31;
 
 unsigned int blobs[12];
@@ -200,13 +200,13 @@ void set3Pts(int x[], int y[]) {
 /* Determines orientation of the puck given two input positions. */
 void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 	double theta2, dist2center;
-	theta = atan2((Dy - By), (Dx - Bx)) - PI/2;
-	if (theta < -PI) { theta += 2 * PI; }
-	theta2 = -atan2(centerx, centery) - PI/2;
-	if (theta2 < -PI) { theta2 += 2 * PI; }
+	theta = atan2((Dy - By), (Dx - Bx)) - 3.1416/2;
+	if (theta < -3.1416) { theta += 2 * 3.1416; }
+	theta2 = -atan2(centerx, centery) - 3.1416/2;
+	if (theta2 < -3.1416) { theta2 += 2 * 3.1416; }
 	dist2center = sqrt((centerx/10.0)*(centerx/10.0) + (centery/10.0)*(centery/10.0)) * 10.0;
-	theta2 = theta - theta2 - PI;
-	if (theta2 < -PI) { theta2 += 2 * PI; }
+	theta2 = theta - theta2 - 3.1416;
+	if (theta2 < -3.1416) { theta2 += 2 * 3.1416; }
 	posX = -(int) (dist2center*cos(theta2) * scaleFactor);
 	posY = -(int) (dist2center*sin(theta2) * scaleFactor);
 	// m_usb_tx_int((int) (posX));

@@ -4,14 +4,16 @@
 * TO DO - CONVERT THE DRIVE FUNCTIONS TO MACROS
 */
 
-#include "vals.h"
 #include "initialization.h"
-#include <math.h>
+#include "vals.h"
+#include "m_general.h"
+#include <stdlib.h>
 
 #define MOTOR_PORT PORTB
 #define LMOTOR_D 1 
 #define RMOTOR_D 2
-
+int goToPoint(int x, int y);
+double thetaThreshold = 0.2;
 
 // Initializes the motors
 void drive_init(void){ 
@@ -56,6 +58,43 @@ void left(void){
 void stop(void){
 	clear(PORTB,MOTOR_EN);
 	clear(PORTB,6);
+}
+
+// Turns in place by a certain number of radians
+void turnInPlaceByTheta(double radians) {
+	if (radians < 0) { radians += 2 * 3.1416; }
+	double endTheta = theta + radians;
+	if (endTheta > 2 * 3.1416) { endTheta -= 2 * 3.1416; }
+	if (radians < 3.1416) {
+		while (abs(endTheta - theta) > thetaThreshold) { right(); }
+	}  else {
+		while (abs(endTheta - theta) > thetaThreshold) { left(); }
+	}
+}
+
+// Turns in place to reach a given orientation in radians
+void turnInPlaceToTheta(double endTheta) {
+	if (endTheta < 0) { endTheta += 2 * 3.1416; }
+	if (endTheta < 3.1416) {
+		while (abs(endTheta - theta) > thetaThreshold) { right(); }
+	}  else {
+		while (abs(endTheta - theta) > thetaThreshold) { left(); }
+	}
+}
+
+void celebrate(void) {
+	right();
+	m_wait(1000);
+	stop();
+}
+
+
+void patrol(void) {
+
+}
+
+void goToGoal(void) {
+	goToPoint(offensiveGoalX, 0); // TODO: Change this to follow a go-to-goal with puck (maintains minimum turning radius)
 }
 
 // Go to point (x,y)

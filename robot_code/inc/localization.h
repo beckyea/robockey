@@ -5,10 +5,6 @@
 #ifndef localization__
 #define localization__
 
-#include <stdio.h>
-#include <math.h>
-#include "m_wii.h"
-#include "vals.h"
 
 /* -----------------------------------------------------------------------------
    Public functions

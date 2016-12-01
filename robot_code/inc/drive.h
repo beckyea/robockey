@@ -28,3 +28,15 @@ int goToPoint(int x, int y);
 // INPUTS: 2 int values, designating x and y positions to be reached
 
 void test(void);
+
+// Turns in place by a certain number of radians
+void turnInPlaceByTheta(double radians);
+
+// Turns in place to reach a given orientation in radians
+void turnInPlaceToTheta(double endTheta);
+
+void patrol(void);
+
+void goToGoal(void);
+
+void celebrate(void);
