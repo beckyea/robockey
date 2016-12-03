@@ -17,9 +17,13 @@ void init_all (enum Bot bot) {
 	m_usb_init();
 	m_bus_init();
 	sei();
+<<<<<<< Updated upstream
 	set(DDRC, 6); // Configure C6 for output -- Positioning LED, RED
 	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
 	init_setRobot(bot);
+=======
+	m_disableJTAG();
+>>>>>>> Stashed changes
 	init_mwii();
 	init_mrf();
 	init_driver();

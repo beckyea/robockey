@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 function [x, y, abs_theta] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4)
 xdiff = 535;
 ydiff = 370;
@@ -7,6 +8,16 @@ X2n = X2 - xdiff; Y2n = Y2 - ydiff;
 X3n = X3 - xdiff; Y3n = Y3 - ydiff;
 X4n = X4 - xdiff; Y4n = Y4 - ydiff;
 
+=======
+function [x, y, theta] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4)
+thetaScale = 0.0005;
+X1n = tan((X1 - 512)*thetaScale)*487; Y1n = tan((Y1 - 384)*thetaScale)*487;
+X2n = tan((X2 - 512)*thetaScale)*487; Y2n = tan((Y2 - 384)*thetaScale)*487;
+X3n = tan((X3 - 512)*thetaScale)*487; Y3n = tan((Y3 - 384)*thetaScale)*487;
+X4n = tan((X4 - 512)*thetaScale)*487; Y4n = tan((Y4 - 384)*thetaScale)*487;
+
+ 
+>>>>>>> Stashed changes
 =======
 function [x, y, theta] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4)
 thetaScale = 0.0005;
@@ -67,6 +78,7 @@ elseif (maxDist == d34)
     end
 end
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 if (Bx == 0 && By == 0 && Dx == 0 && Dy == 0)
     disp('Cannot sense stars.');
 end
@@ -94,6 +106,8 @@ disp([center_x center_y]);
 %[x y]
 end
 =======
+=======
+>>>>>>> Stashed changes
 %[Bx By Dx Dy]
 center_x = (Bx + Dx) / 2;
 center_y = (By + Dy) / 2;
@@ -104,6 +118,14 @@ Bx_alt = x + (Bx * cos(theta) - By * sin(theta));
 By_alt = y + (Bx * sin(theta) + By * cos(theta));
 Dx_alt = x + (Dx * cos(theta) - Dy * sin(theta));
 Dy_alt = y + (Dx * sin(theta) + Dy * cos(theta));
+<<<<<<< Updated upstream
+
+plot(Bx_alt + 230/2, By_alt + 120/2, 'o', 'MarkerFaceColor', 'k','MarkerSize', 5);
+plot(Dx_alt + 230/2, Dy_alt + 120/2, 'o', 'MarkerFaceColor', 'k','MarkerSize', 5);
+
+end
+>>>>>>> Stashed changes
+=======
 
 plot(Bx_alt + 230/2, By_alt + 120/2, 'o', 'MarkerFaceColor', 'k','MarkerSize', 5);
 plot(Dx_alt + 230/2, Dy_alt + 120/2, 'o', 'MarkerFaceColor', 'k','MarkerSize', 5);

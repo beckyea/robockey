@@ -12,8 +12,13 @@ rectangle('Position',[230 29.5 5 59.7])
 
 scaleFactor = .2;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 load('C.mat');
 for i = 380:383%1: length(rawStarData)
+=======
+%load('A.mat');
+for i = 1 : length(rawStarData)
+>>>>>>> Stashed changes
 =======
 %load('A.mat');
 for i = 1 : length(rawStarData)
