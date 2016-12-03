@@ -20,41 +20,41 @@ void init(void);
 void ADC_init(void);
 void findDistanceToPuck(void);
 
-int main(void) {
-	init();
-	ADC_init();
-	set(ADCSRA,ADEN); //Enable ADC
-	set(ADCSRA,ADSC); // Start conversion
+// int main(void) {
+// 	init();
+// 	ADC_init();
+// 	set(ADCSRA,ADEN); //Enable ADC
+// 	set(ADCSRA,ADSC); // Start conversion
 	
-	while(1) {
-		if (ADC_Flag != 0) {  //If ADCs are being read
-			m_red(TOGGLE);
-			clear(ADCSRA,ADEN); // Disable ADC
-			m_usb_tx_string("\nTR: ");
-			m_usb_tx_int(ADC_Channels[0]);
-			m_usb_tx_string("\tR: ");
-			m_usb_tx_int(ADC_Channels[1]);
-			m_usb_tx_string("\tB: ");
-			m_usb_tx_int(ADC_Channels[2]);
-			m_usb_tx_string("\tL: ");
-			m_usb_tx_int(ADC_Channels[3]);
-			m_usb_tx_string("\tTL: ");
-			m_usb_tx_int(ADC_Channels[4]);
-			m_usb_tx_string("\tIL: ");
-			m_usb_tx_int(ADC_Channels[5]);
-			m_usb_tx_string("\tIR: ");
-			m_usb_tx_int(ADC_Channels[6]);
-			m_usb_tx_string("\tD: ");
-			m_usb_tx_int(ADC_Channels[7]);
-			m_usb_tx_string("\t");
-			findDistanceToPuck();
-			m_wait(200);
-			ADC_Flag = 0;
-			set(ADCSRA,ADEN); // Re-enable ADC
-			set(ADCSRA,ADSC);// Start next conversion
-		}
-	}
-}
+// 	while(1) {
+// 		if (ADC_Flag != 0) {  //If ADCs are being read
+// 			m_red(TOGGLE);
+// 			clear(ADCSRA,ADEN); // Disable ADC
+// 			m_usb_tx_string("\nTR: ");
+// 			m_usb_tx_int(ADC_Channels[0]);
+// 			m_usb_tx_string("\tR: ");
+// 			m_usb_tx_int(ADC_Channels[1]);
+// 			m_usb_tx_string("\tB: ");
+// 			m_usb_tx_int(ADC_Channels[2]);
+// 			m_usb_tx_string("\tL: ");
+// 			m_usb_tx_int(ADC_Channels[3]);
+// 			m_usb_tx_string("\tTL: ");
+// 			m_usb_tx_int(ADC_Channels[4]);
+// 			m_usb_tx_string("\tIL: ");
+// 			m_usb_tx_int(ADC_Channels[5]);
+// 			m_usb_tx_string("\tIR: ");
+// 			m_usb_tx_int(ADC_Channels[6]);
+// 			m_usb_tx_string("\tD: ");
+// 			m_usb_tx_int(ADC_Channels[7]);
+// 			m_usb_tx_string("\t");
+// 			findDistanceToPuck();
+// 			m_wait(200);
+// 			ADC_Flag = 0;
+// 			set(ADCSRA,ADEN); // Re-enable ADC
+// 			set(ADCSRA,ADSC);// Start next conversion
+// 		}
+// 	}
+// }
 
 void init(void) {
 	 m_clockdivide(0); // Set system clock prescaler to 1 (16MHz) 
