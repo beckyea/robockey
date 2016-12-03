@@ -93,6 +93,12 @@ void patrol(void) {
 
 }
 
+void goToPuck(void) {
+	if (puckAngle < .08 || puckAngle > 6.2) { fwd(); }
+	else if (puckAngle < 3.1416) { right(); }
+	else { left(); }
+}
+
 void goToGoal(void) {
 	goToPoint(offensiveGoalX, 0); // TODO: Change this to follow a go-to-goal with puck (maintains minimum turning radius)
 }

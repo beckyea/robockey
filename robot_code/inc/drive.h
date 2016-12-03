@@ -1,4 +1,4 @@
-// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------pa=z
 // Header File for Drive Commands
 // These commands handle the different driving configurations for the robot.
 // Higher levels of abstraction, i.e. go to point, are preferred over lower-level
@@ -24,7 +24,7 @@ void stop(void);
 // FUNCTION: Stops the robot
 
 int goToPoint(int x, int y);
-// FUNCTION: Drives the Robot to the Desired Point
+// FUNCTION: Drives the Robot to the Desirem8d Point
 // INPUTS: 2 int values, designating x and y positions to be reached
 
 void test(void);

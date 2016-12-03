@@ -26,7 +26,7 @@ B3 = [0 0 0];
 handle = serial('/dev/tty.usbmodem411','Baudrate', 9600, 'Parity','none');
 %handle.InputBufferSize = 20;
 fclose(instrfind);
-buffer = zeros(11,1);
+buffer = zeros(3,1);
 bufferindex = 0;
 while true
     fopen(handle);
@@ -38,33 +38,36 @@ while true
             buffer(bufferindex) = num(j);
             bufferindex = bufferindex + 1;
         end
-        if (bufferindex == 12)
-            X1 = buffer(1); Y1 = buffer(2);
-            X2 = buffer(3); Y2 = buffer(4);
-            X3 = buffer(5); Y3 = buffer(6);
-            X4 = buffer(7); Y4 = buffer(8);
-            xp = 0; %buffer(10); yp = buffer(11);
-            yp = 0;
-            tp = buffer(9);
-            if (X1 == 1023 && X2 ~= 1023 && X3 ~= 1023 && X4 ~= 1023)
-                [x, y, t] = sees3(X2, Y2, X3, Y3, X4, Y4);
-            elseif (X1 ~= 1023 && X2 == 1023 && X3 ~= 1023 && X4 ~= 1023)
-                [x, y, t] = sees3(X1, Y1, X3, Y3, X4, Y4);
-            elseif (X1 ~= 1023 && X2 ~= 1023 && X3 == 1023 && X4 ~= 1023)
-                [x, y, t] = sees3(X1, Y1, X2, Y2, X4, Y4);
-            elseif (X1 ~= 1023 && X2 ~= 1023 && X3 ~= 1023 && X4 == 1023)
-                [x, y, t] = sees3(X1, Y1, X2, Y2, X3, Y3);
-            elseif (X1 == 1023 || X2 == 1023 || X3 == 1023 || X4 == 1023)
-                disp('2 or fewer stars');
-                x = 0; y = 0;
-            else
-                [x, y, t] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4);
-            end
-            x = x * scaleFactor + 230/2;
-            y = y * scaleFactor + 120/2;
-            disp([x y t tp/1000])
+        if (bufferindex == 4)
+            x = buffer(1) + 230/2;
+            y = buffer(2) + 120/2;
+            t = buffer(3)/100 * 180/3.14159;
+%             X1 = buffer(1); Y1 = buffer(2);
+%             X2 = buffer(3); Y2 = buffer(4);
+%             X3 = buffer(5); Y3 = buffer(6);
+%             X4 = bufferD(7); Y4 = buffer(8);
+%             xp = 0; %buffer(10); yp = buffer(11);
+%             yp = 0;
+%             tp = buffer(9);
+%             if (X1 == 1023 && X2 ~= 1023 && X3 ~= 1023 && X4 ~= 1023)
+%                 [x, y, t] = sees3(X2, Y2, X3, Y3, X4, Y4);
+%             elseif (X1 ~= 1023 && X2 == 1023 && X3 ~= 1023 && X4 ~= 1023)
+%                 [x, y, t] = sees3(X1, Y1, X3, Y3, X4, Y4);
+%             elseif (X1 ~= 1023 && X2 ~= 1023 && X3 == 1023 && X4 ~= 1023)
+%                 [x, y, t] = sees3(X1, Y1, X2, Y2, X4, Y4);
+%             elseif (X1 ~= 1023 && X2 ~= 1023 && X3 ~= 1023 && X4 == 1023)
+%                 [x, y, t] = sees3(X1, Y1, X2, Y2, X3, Y3);
+%             elseif (X1 == 1023 || X2 == 1023 || X3 == 1023 || X4 == 1023)
+%                 disp('2 or fewer stars');
+%                 x = 0; y = 0;
+%             else
+%                 [x, y, t] = sees4(X1, Y1, X2, Y2, X3, Y3, X4, Y4);
+%             end
+%             x = x * scaleFactor + 230/2;
+%             y = y * scaleFactor + 120/2;
+            disp([x y t])
             plot(x, y, 'o', 'MarkerFaceColor', 'm' , 'MarkerSize', bot_r * 2);
-            
+            line([x, (bot_r * cosd(t) + x)], [y, (bot_r * sind(t) + y)]);
             drawnow
         end
     end

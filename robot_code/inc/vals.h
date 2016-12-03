@@ -6,7 +6,7 @@
 #define vals__
 
 // Values for General Robot Definition
-#define MOTOR_EN 0
+#define MOTOR_EN 3
 extern enum Color teamColor;
 
 // Field Values - Change these for Tuning to the Field
@@ -24,6 +24,9 @@ extern char ROBOT_ADDRESS;
 extern int posX;
 extern int posY;
 extern double theta;
+extern double velX;
+extern double velY;
+extern double omega;
 extern char hasPuck;
 extern char seesPuck;
 
@@ -39,13 +42,11 @@ extern int offensiveGoalX;
 extern char inPlay;
 extern int ourScore;
 extern int otherScore;
+extern long time;
 
 // Enumerations
 enum Color { RED = 1, BLUE = 2 };
 enum Bot { GOALIE, OFF1, OFF2 };
 enum State { PATROL = 0, GO_TO_PUCK = 1, GO_TO_GOAL = 2, HALF_PATROL = 3, GO_TO_BOX_CORNER = 4 };
-
-// Methods
-void vals_reset(void);
 
 #endif

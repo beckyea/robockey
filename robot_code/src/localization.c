@@ -9,20 +9,33 @@
 #define SQ(x) ((x) * (x))
 
 #define XSHIFT 535
-#define YSHIFT 380
-double scaleFactor = 0.31;
+#define YSHIFT 340
+#define ALPHA .8
+#define POS_THRESHOLD 50
+double scaleFactor = 0.32;
 
 unsigned int blobs[12];
 char recievedWii;
+
+int prevPosX = 500;
+int prevPosY = 500;
+double prevTheta = 0;
+long prevTime = 0;
+
+double velX = 0;
+double velY = 0;
+double omega = 0;
 
 void set4Pts(int x[], int y[]);
 void set3Pts(int x[], int y[]);
 void findOrientation();
 void readStars();
-
+void lowPassPosition();
+void calculateVelocity();
 
 /* Reads the Wii. Begins execution of localization */
 char loc_readWii() {
+	//m_green(ON);
 	recievedWii = m_wii_read(blobs);
 	if (recievedWii) { 
 		readStars(); 
@@ -55,11 +68,11 @@ void readStars() {
 			valCount++;
 		}
 	}
-	if (valCount == 4) { set4Pts(x_vals, y_vals); }
-	else if (valCount == 3) { set3Pts(x_vals, y_vals); }
+	if (valCount == 4) { set4Pts(x_vals, y_vals); m_red(OFF); }
+	else if (valCount == 3) { set3Pts(x_vals, y_vals); m_red(OFF); }
 	else if (valCount == 2) { }//m_usb_tx_int(2); m_usb_tx_string("\n");}
-	else if (valCount == 3) { }//m_usb_tx_int(1); m_usb_tx_string("\n");}
-	else { }//m_usb_tx_int(0); }
+	else if (valCount == 1) { }//m_usb_tx_int(1); m_usb_tx_string("\n");}
+	else { m_red(ON); m_usb_tx_string("0");}//m_usb_tx_int(0); }
 }
 
 /* Sets the center of the field in the local frame of the robot
@@ -142,7 +155,6 @@ void set3Pts(int x[], int y[]) {
 		My = y[C] + (y[C] - y[A]) * 0.5245;
 		centerx = Mx - (x[D] + (x[D] - Mx) * 0.273);
 		centery = My - (y[D] + (y[D] - My) * 0.273);
-		m_usb_tx_string("B");
 		findOrientation(centerx, centerx, x[D], y[D], centerx, centery);
 	} else if (ratio > 4.0) { // A missing, Max: BD, Min: BC
 		if (maxDist == d12) {
@@ -157,7 +169,6 @@ void set3Pts(int x[], int y[]) {
 		}
 		centerx = (x[B] + x[D]) / 2;
 		centery = (y[B] + y[D]) / 2;
-		m_usb_tx_string("A");
 		findOrientation(x[B], y[B], x[D], y[D], centerx, centery);
 	} else if ((long)(maxDist*maxDist/minDist) < 2200) { // D missing, Max: AC, Min: BC
 		if (maxDist == d12) {
@@ -176,7 +187,6 @@ void set3Pts(int x[], int y[]) {
 		centerx = Mx - (x[B] + (x[B] - Mx) * 1.604);
 		centery = My - (y[B] + (y[B] - My) * 1.604);
 		findOrientation(centerx, centerx, x[D], y[D],  centerx, centery);
-		m_usb_tx_string("D");
 	} else { // C missing, Max: BD, Min: AB
 		if (maxDist == d12) { 
 			if (minDist == d13) { B = 0; D = 1; }
@@ -190,29 +200,53 @@ void set3Pts(int x[], int y[]) {
 		}
 		centerx = (x[B] + x[D]) / 2;
 		centery = (y[B] + y[D]) / 2;
-		m_usb_tx_string("C");
 		findOrientation(x[B], y[B], x[D], y[D], centerx, centery);
 	}
-	m_usb_tx_string("\n");
 }
 
 
 /* Determines orientation of the puck given two input positions. */
 void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
+	prevPosX = posX; prevPosY = posY; prevTheta = theta;
 	double theta2, dist2center;
 	theta = atan2((Dy - By), (Dx - Bx)) - 3.1416/2;
 	if (theta < -3.1416) { theta += 2 * 3.1416; }
 	theta2 = -atan2(centerx, centery) - 3.1416/2;
 	if (theta2 < -3.1416) { theta2 += 2 * 3.1416; }
 	dist2center = sqrt((centerx/10.0)*(centerx/10.0) + (centery/10.0)*(centery/10.0)) * 10.0;
-	theta2 = theta - theta2 - 3.1416;
+	theta2 = 3.1416 + theta - theta2;
 	if (theta2 < -3.1416) { theta2 += 2 * 3.1416; }
+	if (theta2 > 3.1416) { theta2 -= 2 * 3.1416; }
 	posX = -(int) (dist2center*cos(theta2) * scaleFactor);
 	posY = -(int) (dist2center*sin(theta2) * scaleFactor);
+	lowPassPosition();
+}
+
+void lowPassPosition(void) {
+	if (prevPosX == 500 && prevPosY == 500) { } // Covers case in which no position has been found yet. Contirnue to use previous value
+	else if (abs(posX - prevPosX) < POS_THRESHOLD || abs(posY - prevPosY) < POS_THRESHOLD) {
+		posX = prevPosX * ALPHA + posX * (1 - ALPHA);
+		posY = prevPosY * ALPHA + posY * (1 - ALPHA);
+		theta = prevTheta * ALPHA + theta * (1 - ALPHA);
+	} else {
+		posX = prevPosX;
+		posY = prevPosY;
+		theta = prevTheta;
+		calculateVelocity();
+	}
+	// m_usb_tx_uint(5555); m_usb_tx_string(","); m_usb_tx_push();
 	// m_usb_tx_int((int) (posX));
-	// m_usb_tx_string("\t");
+	// m_usb_tx_string(",");
 	// m_usb_tx_int((int) (posY));
+	// m_usb_tx_string(",");
+	// m_usb_tx_int((int) (theta * 100));
 	// m_usb_tx_string("\n");
+}
+
+void calculateVelocity(void) {
+	velX = (posX - prevPosX) / (time - prevTime);
+	velY = (posY - prevPosY) / (time - prevTime);
+	omega = (theta - prevTheta) / (time - prevTime);
 }
 
 /* Gets x as seen in unsigned bits */
@@ -226,7 +260,6 @@ unsigned int loc_getT() { return (unsigned int) (theta * 100); }
 
 /* Determines side of court */
 char loc_getSide() { 
-	if (posX < 0 && posX > -115) { return 1; } // Left side
-	else if (posX < 115) { return 2; } // Right side
-	else { return 0; } // Error
+	if (posX < 0) { return 1; } // Left side
+	else { return 2; } // Right side
 }

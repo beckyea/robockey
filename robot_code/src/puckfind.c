@@ -34,6 +34,7 @@ void printValues(void) {
 	m_usb_tx_string("\tD: ");  m_usb_tx_int(PTs[7]);
 	m_usb_tx_string("\tAngle: "); m_usb_tx_int(puckAngle*180/3.1416);
 	m_usb_tx_string("\tDist: "); m_usb_tx_int(rangeVal * 100);
+	m_usb_tx_string("\tAmbient: "); m_usb_tx_int(ptNoise);
 }
 
 // returns whether values were found
@@ -41,14 +42,13 @@ int puck_getADCValues(void) {
 	if (ADC_Flag != 0) {  //If ADCs are being read
 		clear(ADCSRA,ADEN); // Disable ADC
 		puck_findAngle();
-		printValues(); // UNCOMMENT THIS LINE IN FINAL VERSION
+		printValues(); // COMMENT THIS LINE IN FINAL VERSION
 		ADC_Flag = 0;
 		set(ADCSRA,ADEN); // Re-enable ADC
 		set(ADCSRA,ADSC); // Start next conversion
 		return 1;
 	}
 	return 0;
-
 }
 
 void puck_findAngle(void) {
@@ -62,10 +62,10 @@ void puck_findAngle(void) {
 		puckAngle = 0; // puck is straight ahead
 	} else if ((PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) ||
 			   (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD)) {
-		puckAngle = 0.01; // SOME SMALL ANGLE TO THE LEFT -- TODO: FIGURE OUT HOW TO CALCULATE THIS
+		puckAngle = 0.01; // some small angle to the left -- TODO: FIGURE OUT HOW TO CALCULATE THIS
 	} else if ((PTs[TopLeft] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) ||
 			   (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD)) {
-		puckAngle = 6.18; // SOME SMALL ANGLE TO THE RIGHT - TODO: FIGURE OUT HOW TO CALCULATE THIS
+		puckAngle = 6.18; // some small angle to the right - TODO: FIGURE OUT HOW TO CALCULATE THIS
 	} else if (rangeVal > .10) {
 		// find 2 max PTs
 		int i, maxPT1, maxPT2; maxPT1 = 0; maxPT2 = 1; 
@@ -113,7 +113,6 @@ void normalizePTs(void) {
 }
 
 void setAmbient(void) {
-	m_red(ON);
 	while (!puck_getADCValues());
 	ptNoise = PTs[Back] < PTs[Left]  ?  PTs[Back] : PTs[Left];
 	ptNoise = ptNoise   < PTs[Right] ?  ptNoise	  : PTs[Right];
