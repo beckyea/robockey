@@ -13,17 +13,13 @@
 #include "vals.h"
 
 // Initializes all Subsystems
-void init_all (enum Bot bot) {
+void init_all (void) {
 	m_usb_init();
 	m_bus_init();
 	sei();
-<<<<<<< Updated upstream
 	set(DDRC, 6); // Configure C6 for output -- Positioning LED, RED
 	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
-	init_setRobot(bot);
-=======
-	m_disableJTAG();
->>>>>>> Stashed changes
+	init_setRobot();
 	init_mwii();
 	init_mrf();
 	init_driver();
@@ -69,11 +65,27 @@ void init_adc(void) {
 
 // // Initializes Timer 4, pins for Motor Output
 void init_driver(void) {
-	// INITIALIZE TIMER 4 FOR PWM
+	set(DDRD,3); //D3 --> A0 (MOTOR ENABLE)
+	set(DDRC,6); //C6 --> D7 (INA1)
+	set(DDRB,6); //B6 --> D4 (INA2)
+	set(DDRC,7); //C7 --> D8 (INB1)
+	set(DDRB,5); //B5 --> D9 (INB2)
+
+	// Initialize Timer 4
+	set(TCCR4B,CS43); clear(TCCR4B,CS42); clear(TCCR4B,CS41); clear(TCCR4B,CS40);// set timer prescaler to /64
+	clear(TCCR4D,WGM41); clear(TCCR4D,WGM40); // Count UP to OCR4C
+	set(TCCR4A,PWM4A); set(TCCR4A,COM4A1); clear(TCCR4A,COM4A0); //PWM, set at rollover, clear at OCR4A
+	set(TCCR4B,PWM4B); set(TCCR4B,COM4B1); clear(TCCR4B,COM4B0); //PWM, set at rollover, clear at OCR4B
+
+	// set(TIMSK4,OCIE4A); //Enable interrupt when TCNT1 = OCR1A
+	// set(TIMSK4,OCIE4B); //Enable interrupt when TCNT1 = OCR1B
+	OCR4C = 255;
+	OCR4A = 255;
+	OCR4B = 255;
 }
 
-void init_setRobot(enum Bot bot) {
-	switch(bot) {
+void init_setRobot(void) {
+	switch (currBot) {
 		case GOALIE:
 			ROBOT_ADDRESS = (char) 0x1A;
 			break;
@@ -84,12 +96,13 @@ void init_setRobot(enum Bot bot) {
 			ROBOT_ADDRESS = (char) 0x19;
 			break;
 	}
+	init_setGoal();
 }
 
 void init_setGoal() {
 	switch(teamColor) {
-		case(RED):  offensiveGoalX = 115;  defensiveGoalX = -115; break;
-		case(BLUE): offensiveGoalX = -115; defensiveGoalX = 115; break;
+		case RED:  offensiveGoalX = 115;  defensiveGoalX = -115; break;
+		case BLUE: offensiveGoalX = -115; defensiveGoalX = 115; break;
 	}
 
 }

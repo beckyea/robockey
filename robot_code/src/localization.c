@@ -21,7 +21,7 @@ int prevPosX = 500;
 int prevPosY = 500;
 double prevTheta = 0;
 long prevTime = 0;
-
+int deltat = 0;
 double velX = 0;
 double velY = 0;
 double omega = 0;
@@ -244,9 +244,10 @@ void lowPassPosition(void) {
 }
 
 void calculateVelocity(void) {
-	velX = (posX - prevPosX) / (time - prevTime);
-	velY = (posY - prevPosY) / (time - prevTime);
-	omega = (theta - prevTheta) / (time - prevTime);
+	deltat = time - prevTime;
+	velX = (posX - prevPosX) / deltat;
+	velY = (posY - prevPosY) / deltat;
+	omega = (theta - prevTheta) / deltat;
 }
 
 /* Gets x as seen in unsigned bits */

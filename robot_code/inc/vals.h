@@ -8,12 +8,18 @@
 // Values for General Robot Definition
 #define MOTOR_EN 3
 extern enum Color teamColor;
+extern enum Bot currBot;
+extern enum State gameState;
 
 // Field Values - Change these for Tuning to the Field
 #define goalRange 27    	// length of the goal in the y direction from the center in cm
 #define patrolXRange 87 	// magnitude of x value from center for patrol
 #define patrolYVal 20		// magnitude of y value from central axis for patrol
 #define goalBoxXLength 30	// minimum distance for bot to travel from own goal
+extern int offensiveGoalX;
+extern int defensiveGoalX;
+extern int minTraversalX;
+extern int maxTraversalX;
 
 // Values for mRF Sensor
 #define CHANNEL 1
@@ -27,19 +33,13 @@ extern double theta;
 extern double velX;
 extern double velY;
 extern double omega;
-extern char hasPuck;
-extern char seesPuck;
+extern int deltat;
 
 // Values for Puck Finding
 extern double rangeVal;
 extern double puckAngle;
 
-// Values Describing the Field
-extern int defensiveGoalX;
-extern int offensiveGoalX;
-
 // Values Describing the Game
-extern char inPlay;
 extern int ourScore;
 extern int otherScore;
 extern long time;
@@ -47,6 +47,6 @@ extern long time;
 // Enumerations
 enum Color { RED = 1, BLUE = 2 };
 enum Bot { GOALIE, OFF1, OFF2 };
-enum State { PATROL = 0, GO_TO_PUCK = 1, GO_TO_GOAL = 2, HALF_PATROL = 3, GO_TO_BOX_CORNER = 4 };
+enum State { NOT_IN_PLAY, PATROL, GO_TO_PUCK, GO_TO_GOAL, HALF_PATROL, GO_TO_BOX_CORNER };
 
 #endif

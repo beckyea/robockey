@@ -9,7 +9,7 @@
    Public functions
 ----------------------------------------------------------------------------- */
 
-void init_all (enum Bot bot); 
+void init_all (void); 
 // FUNCTION: Calls all other initialization commands in the localization.c file
 // INPUT: Bot you're initializing for
 
@@ -27,7 +27,7 @@ void init_adc(void);
 void init_setGoal(void);
 // FUNCTION: Sets the coordinates of both goals as global variables
 
-void init_setRobot(enum Bot bot);
+void init_setRobot(void);
 // FUNCTION: Initializes the values and strategy of the bot
 
 #endif
