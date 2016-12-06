@@ -219,6 +219,8 @@ void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 	if (theta2 > 3.1416) { theta2 -= 2 * 3.1416; }
 	posX = -(int) (dist2center*cos(theta2) * scaleFactor);
 	posY = -(int) (dist2center*sin(theta2) * scaleFactor);
+	theta = atan2((Dy - By), (Dx - Bx)) + 3.1416;
+	if (theta > 3.1416) { theta -= 2 * 3.1416; }
 	lowPassPosition();
 }
 

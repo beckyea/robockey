@@ -153,8 +153,8 @@ void goToGoal(void) {
 // Go to point (x,y)
 int goToPoint(int x, int y) {
 	double thetaToPos, theta_temp;
-	thetaToPos = (double) (atan2(posY - y, posX - x)) - 3.1416/2;
-	if (thetaToPos < - 3.1416) { thetaToPos = thetaToPos + 3.1416*2; }
+	thetaToPos = (double) (atan2(posY - y, posX - x)) + 3.1416 / 2;
+	if (thetaToPos > 3.1416) { thetaToPos = thetaToPos - 3.1416 * 2; }
 	theta_temp = theta;
 	if (abs(posX - x) < 10 && abs(posY - y) < 10) {
 		stop();

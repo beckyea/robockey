@@ -84,22 +84,22 @@ void puck_findAngle(void) {
 				int smallerIndex = maxPT1 < maxPT2 ? maxPT1 : maxPT2;
 				if (smallerIndex == 0 && (maxPT1 == 6 || maxPT2 == 6)) { smallerIndex = 6; }
 				switch (smallerIndex) {
-					case TopRight : puckAngle = approxAngle(0.698, PTs[TopRight], PTs[Right]) + 0.873; break;
-					case Right :    puckAngle = approxAngle(3.1416/2, PTs[Right], PTs[Back]) +  3.1416/2; break;
-					case Back :     puckAngle = approxAngle(3.1416/2, PTs[Back], PTs[Left]) + 3.1416; break;
-					case Left :     puckAngle = approxAngle(0.698, PTs[Left], PTs[TopLeft]) + 3*3.1416/2; break;
+					case TopRight : puckAngle = 5.410 - approxAngle(0.698, PTs[TopRight], PTs[Right]); break;
+					case Right :    puckAngle = 4.712 - approxAngle(1.571, PTs[Right], PTs[Back]);     break;
+					case Back :     puckAngle = 3.142 - approxAngle(1.571, PTs[Back], PTs[Left]);      break;
+					case Left :     puckAngle = 1.571 - approxAngle(0.698, PTs[Left], PTs[TopLeft]);   break;
 					default :       puckAngle = 0; break; // TODO: WHAT DO WE DO HERE???
 				}
 			}
 			// if the indices are not continuous, assume that it is angled in the direction of the largest value
 			else {
 				switch (maxPT1) {
-					case TopRight: puckAngle = 0.872665; break;
-					case Right:    puckAngle = 3.1416/2; break;
-					case Back:     puckAngle = 3.1416; break;
-					case Left:     puckAngle = 3 * 3.1416/2; break;
-					case TopLeft:  puckAngle = 5.41052; break;
-					default:       puckAngle = 0; 
+					case TopRight : puckAngle = 5.41052; break;
+					case Right :    puckAngle = 2 * 3.1416/2; break;
+					case Back :     puckAngle = 3.1416; break;
+					case Left :     puckAngle = 3.1416/2; break;
+					case TopLeft :  puckAngle = 0.872665; break;
+					default :       puckAngle = 0; break;
 				}
 			}
 		}
