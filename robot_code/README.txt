@@ -30,3 +30,13 @@ D4 : ADC, Phototransistor
 D5 : 
 D6 : ADC, Phototransistor
 D7 :
+
+STATUS LEDS:
+onboard green - mWii not connected
+onboard red - only 0-2 points seen for localization
+yellow LED - sees puck
+
+ROBOT ADDRESSES:
+0x18 - Offensive Bot 1
+0x19 - Offensive Bot 2
+0x1A - Goalie Bot

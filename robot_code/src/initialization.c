@@ -17,8 +17,9 @@ void init_all (void) {
 	m_usb_init();
 	m_bus_init();
 	sei();
-	set(DDRC, 6); // Configure C6 for output -- Positioning LED, RED
-	set(DDRC, 7); // Configure C7 for output -- Positioning LED, BLUE
+	set(DDRB, 1); // Configure B1 for output -- Positioning LED, RED
+	set(DDRB, 2); // Configure B2 for output -- Positioning LED, BLUE
+	set(DDRB, 0); // Configure B0 for output -- Yellow LED
 	init_setRobot();
 	init_mwii();
 	init_mrf();
@@ -96,13 +97,12 @@ void init_setRobot(void) {
 			ROBOT_ADDRESS = (char) 0x19;
 			break;
 	}
-	init_setGoal();
 }
 
 void init_setGoal() {
 	switch(teamColor) {
-		case RED:  offensiveGoalX = 115;  defensiveGoalX = -115; break;
-		case BLUE: offensiveGoalX = -115; defensiveGoalX = 115; break;
+		case RED:  offensiveGoalX = 115;  defensiveGoalX = -115; minTraversalX = -115 + goalBoxXLength; break;
+		case BLUE: offensiveGoalX = -115; defensiveGoalX = 115;  maxTraversalX =  115 - goalBoxXLength; break;
 	}
 
 }

@@ -55,52 +55,55 @@ void puck_findAngle(void) {
 	normalizePTs();
 	rangeVal = (PTs[TopRight] + PTs[TopLeft] + PTs[InnerLeft] + PTs[InnerRight]) / 4;
 	rangeVal = (rangeVal + PTs[Right] + PTs[Back] + PTs[Left]) / (4 * maxPTval);
-	if (PTs[Down] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) {
-			puckAngle = 0;
-			gameState = GO_TO_GOAL;
-	} else if (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) { 
-		puckAngle = 0; // puck is straight ahead
+	if (rangeVal < 0.10) {
+		clear(PORTB, 0);
+		gameState = PATROL;
+	} else { 
 		gameState = GO_TO_PUCK;
-	} else if ((PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) ||
-			   (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD)) {
-		puckAngle = 0.01; // some small angle to the left -- TODO: FIGURE OUT HOW TO CALCULATE THIS
-		gameState = GO_TO_PUCK;
-	} else if ((PTs[TopLeft] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) ||
-			   (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD)) {
-		puckAngle = 6.18; // some small angle to the right - TODO: FIGURE OUT HOW TO CALCULATE THIS
-		gameState = GO_TO_PUCK;
-	} else if (rangeVal > .10) {
-		gameState = GO_TO_PUCK;
-		// find 2 max PTs
-		int i, maxPT1, maxPT2; maxPT1 = 0; maxPT2 = 1; 
-		for (i = 1; i < NUM_PTS - 1; i++) { // CHANGE THIS
-			if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
-			else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
-		}
-		// if the indices are continuous
-		if (maxPT1 - maxPT2 == 1 || maxPT2 - maxPT1 == 1 || maxPT1 - maxPT2 == 6 || maxPT2 - maxPT1 == 6) {
-			int smallerIndex = maxPT1 < maxPT2 ? maxPT1 : maxPT2;
-			if (smallerIndex == 0 && (maxPT1 == 6 || maxPT2 == 6)) { smallerIndex = 6; }
-			switch (smallerIndex) {
-				case TopRight : puckAngle = approxAngle(0.698, PTs[TopRight], PTs[Right]) + 0.873; break;
-				case Right :    puckAngle = approxAngle(3.1416/2, PTs[Right], PTs[Back]) +  3.1416/2; break;
-				case Back :     puckAngle = approxAngle(3.1416/2, PTs[Back], PTs[Left]) + 3.1416; break;
-				case Left :     puckAngle = approxAngle(0.698, PTs[Left], PTs[TopLeft]) + 3*3.1416/2; break;
-				default :       puckAngle = 0; break; // TODO: WHAT DO WE DO HERE???
+		set(PORTB, 0);
+		if (PTs[Down] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) {
+				puckAngle = 0;
+				gameState = GO_TO_GOAL;
+		} else if (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) { 
+			puckAngle = 0; // puck is straight ahead
+		} else if ((PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) ||
+				   (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD)) {
+			puckAngle = 0.1; // some small angle to the left -- TODO: FIGURE OUT HOW TO CALCULATE THIS
+		} else if ((PTs[TopLeft] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) ||
+				   (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD)) {
+			puckAngle = 6.18; // some small angle to the right - TODO: FIGURE OUT HOW TO CALCULATE THIS
+		} else if (rangeVal > .10) {
+			// find 2 max PTs
+			int i, maxPT1, maxPT2; maxPT1 = 0; maxPT2 = 1; 
+			for (i = 1; i < NUM_PTS - 1; i++) { // CHANGE THIS
+				if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
+				else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
+			}
+			// if the indices are continuous
+			if (maxPT1 - maxPT2 == 1 || maxPT2 - maxPT1 == 1 || maxPT1 - maxPT2 == 6 || maxPT2 - maxPT1 == 6) {
+				int smallerIndex = maxPT1 < maxPT2 ? maxPT1 : maxPT2;
+				if (smallerIndex == 0 && (maxPT1 == 6 || maxPT2 == 6)) { smallerIndex = 6; }
+				switch (smallerIndex) {
+					case TopRight : puckAngle = approxAngle(0.698, PTs[TopRight], PTs[Right]) + 0.873; break;
+					case Right :    puckAngle = approxAngle(3.1416/2, PTs[Right], PTs[Back]) +  3.1416/2; break;
+					case Back :     puckAngle = approxAngle(3.1416/2, PTs[Back], PTs[Left]) + 3.1416; break;
+					case Left :     puckAngle = approxAngle(0.698, PTs[Left], PTs[TopLeft]) + 3*3.1416/2; break;
+					default :       puckAngle = 0; break; // TODO: WHAT DO WE DO HERE???
+				}
+			}
+			// if the indices are not continuous, assume that it is angled in the direction of the largest value
+			else {
+				switch (maxPT1) {
+					case TopRight: puckAngle = 0.872665; break;
+					case Right:    puckAngle = 3.1416/2; break;
+					case Back:     puckAngle = 3.1416; break;
+					case Left:     puckAngle = 3 * 3.1416/2; break;
+					case TopLeft:  puckAngle = 5.41052; break;
+					default:       puckAngle = 0; 
+				}
 			}
 		}
-		// if the indices are not continuous, assume that it is angled in the direction of the largest value
-		else {
-			switch (maxPT1) {
-				case TopRight: puckAngle = 0.872665; break;
-				case Right:    puckAngle = 3.1416/2; break;
-				case Back:     puckAngle = 3.1416; break;
-				case Left:     puckAngle = 3 * 3.1416/2; break;
-				case TopLeft:  puckAngle = 5.41052; break;
-				default:       puckAngle = 0; 
-			}
-		}
-	} else { gameState = PATROL; }
+	}
 }
 
 double approxAngle(double range, int val1, int val2) {

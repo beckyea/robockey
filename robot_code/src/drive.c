@@ -1,7 +1,6 @@
  /**
 * Methods to control the robot's drivetrain given input values of where to go
 * and how to get there.
-* TO DO - CONVERT THE DRIVE FUNCTIONS TO MACROS
 */
 
 #include "initialization.h"
@@ -11,9 +10,6 @@
 #include <stdlib.h>
 
 #define MOTOR_PORT PORTB
-
-#define PATROL_X_BUFFER 50
-#define PATROL_Y_HEIGHT 20
 
 #define DRIVE_ALPHA 0.2
 
@@ -26,7 +22,7 @@ double thetaThreshold = 0.2;
 double integral, preverror;
 int deltat;
 
-int OCR4A_desired, OCR4B_desired;
+int DC_A_desired, DC_B_desired;
 
 void setLeftFwd(void);
 void setLeftRev(void);
@@ -40,42 +36,39 @@ void drive_init(void) {
 	set(DDRB,MOTOR_EN); // Define output pins for Motor Control
 }
 
-void setLeftFwd(void)  { set(PORTC, 7); clear(PORTC, 6); }
-void setLeftRev(void)  { clear(PORTC, 7); set(PORTC, 6); }
-void setRightFwd(void) { set(PORTB, 5); clear(PORTB, 6); }
-void setRightRev(void) { clear(PORTB, 5); set(PORTB, 6); }
-void stop(void)        { clear(TCCR4B,CS43); clear(TCCR4B,CS42); clear(TCCR4B,CS41); clear(TCCR4B,CS40); }
+void setLeftFwd(void)  { if (!check(PORTB, 3)) { drive_init(); } set(PORTC, 7);   clear(PORTC, 6); }
+void setLeftRev(void)  { if (!check(PORTB, 3)) { drive_init(); } clear(PORTC, 7); set(PORTC, 6);   }
+void setRightFwd(void) { if (!check(PORTB, 3)) { drive_init(); } set(PORTB, 5);   clear(PORTB, 6); }
+void setRightRev(void) { if (!check(PORTB, 3)) { drive_init(); } clear(PORTB, 5); set(PORTB, 6);   }
+void stop(void)        { clear(DDRB, MOTOR_EN); }
 
-// Set Desired PWM Output
-void fwd_fast(void) { OCR4A_desired = 255;  OCR4B_desired = 255;  setDrive(); }
-void fwd_slow(void) { OCR4A_desired = 150;  OCR4B_desired = 150;  setDrive(); }
-void rev_fast(void) { OCR4A_desired = -1;   OCR4B_desired = -1;   setDrive(); }
-void rev_slow(void) { OCR4A_desired = -105; OCR4B_desired = -105; setDrive(); }
-void right(void)    { OCR4A_desired = 126;  OCR4B_desired = 63;   setDrive(); }
-void left(void)     { OCR4A_desired = 63;   OCR4B_desired = 0;    setDrive(); }
-void right_ip(void) { OCR4A_desired = 126;  OCR4B_desired = -129; setDrive(); }
-void left_ip(void)  { OCR4A_desired = -129; OCR4B_desired = 126;  setDrive(); }
+// Set Desired Duty Cycle
+void fwd_fast(void) { DC_A_desired = 100;  DC_A_desired = 100;  setDrive(); }
+void fwd_slow(void) { DC_A_desired = 50;   DC_B_desired = 50;   setDrive(); }
+void rev_fast(void) { DC_A_desired = -100; DC_B_desired = -100; setDrive(); }
+void rev_slow(void) { DC_A_desired = -50;  DC_B_desired = -50;  setDrive(); }
+void right(void)    { DC_A_desired = 50;   DC_B_desired = 25;   setDrive(); }
+void left(void)     { DC_A_desired = 25;   DC_B_desired = 50;   setDrive(); }
+void right_ip(void) { DC_A_desired = 50;   DC_B_desired = -50;  setDrive(); }
+void left_ip(void)  { DC_A_desired = -50;  DC_B_desired = 50;   setDrive(); }
 
 void setDrive(void) {
-	int OCR4A_curr, OCR4B_curr;
-	if (check(PINC, 7)) { OCR4A_curr = OCR4A; }
-	else { OCR4A_curr = - OCR4A; }
-	if (check(PINB, 5)) { OCR4B_curr = OCR4B; }
-	else { OCR4B_curr = - OCR4B; }
-	OCR4A_curr = (int) (OCR4A_curr * DRIVE_ALPHA + (1 - DRIVE_ALPHA) * OCR4A_desired);
-	OCR4B_curr = (int) (OCR4B_curr * DRIVE_ALPHA + (1 - DRIVE_ALPHA) * OCR4B_desired);
-	if (OCR4A_curr < 0) { OCR4A = -OCR4A_curr; setLeftRev(); }
-	else if (OCR4A_curr > 0) { OCR4A = OCR4A_curr; setLeftFwd(); }
-	else { OCR4A = 0; 
-		if (OCR4A_desired < 0) { setLeftRev(); } 
-		else { setLeftFwd(); }
-	}
-	if (OCR4B_curr < 0) { OCR4B = -OCR4B_curr; setRightRev(); }
-	else if (OCR4B_curr > 0) { OCR4B = OCR4B_curr; setRightFwd(); }
-	else { OCR4B = 0; 
-		if (OCR4B_desired < 0) { setLeftRev(); } 
-		else { setLeftFwd(); }
-	}
+	int DC_A_curr, DC_B_curr;
+	// determine current duty cycle
+	if (check(PINC, 7)) { DC_A_curr = OCR4A*100/255; }
+	else { DC_A_curr = 100 - OCR4A*100/255; }
+	if (check(PINB, 5)) { DC_B_curr = OCR4B*100/255; }
+	else { DC_B_curr = OCR4B*100/255;  }
+	// low pass filter the duty cycles to determine desired duty cycle
+	DC_A_curr = (int) (DC_A_curr * DRIVE_ALPHA + (1 - DRIVE_ALPHA) * DC_A_desired);
+	DC_B_curr = (int) (DC_B_curr * DRIVE_ALPHA + (1 - DRIVE_ALPHA) * DC_B_desired);
+	// determine whether bot is going forward or reverse, set OCR values
+	if (DC_A_curr > 0) { setLeftFwd(); OCR4A = DC_A_curr * 255 / 100; }
+	else if (DC_A_curr < 0) { setLeftRev(); OCR4A = 255 + DC_A_curr * 255 / 100; }
+	else { setLeftFwd(); OCR4A = 0; }
+	if (DC_B_curr > 0) { setRightFwd(); OCR4B = DC_B_curr * 255 / 100; }
+	else if (DC_B_curr < 0) { setRightRev(); OCR4B = 255 + DC_B_curr * 255 / 100; }
+	else { setRightFwd(); OCR4B = 0; }
 }
 
 // Test Code to test Motor Controller
@@ -133,16 +126,16 @@ void celebrate(void) {
 
 void patrol(void) {
 	if (currBot == OFF1) {
-		if (velX > 0 && posX < 115 - PATROL_X_BUFFER) { 
-			goToPoint(115 - PATROL_X_BUFFER, PATROL_Y_HEIGHT); 
-		} else if (velX <= 0  && posX < -115 + PATROL_X_BUFFER) {
-			goToPoint(PATROL_X_BUFFER - 115, PATROL_Y_HEIGHT);
+		if (velX > 0 && posX < maxTraversalX) { 
+			goToPoint(maxTraversalX, patrolYVal); 
+		} else if (velX <= 0  && posX < minTraversalX) {
+			goToPoint(minTraversalX, patrolYVal);
 		}
 	} else if (currBot == OFF2) {
-		if (velX > 0 && posX < 115 - PATROL_X_BUFFER) { 
-			goToPoint(115 - PATROL_X_BUFFER, -PATROL_Y_HEIGHT); 
-		} else if (velX <= 0  && posX < -115 + PATROL_X_BUFFER) {
-			goToPoint(PATROL_X_BUFFER - 115, -PATROL_Y_HEIGHT);
+		if (velX > 0 && posX < maxTraversalX) { 
+			goToPoint(maxTraversalX, -patrolYVal); 
+		} else if (velX <= 0  && posX < minTraversalX) {
+			goToPoint(minTraversalX, -patrolYVal);
 		}
 	}
 }
