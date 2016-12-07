@@ -35,4 +35,6 @@ enum Color loc_getSide(void);
 // TAKES: nothing
 // RETURNS: 0 if no data, 1 if left side, 2 if right side
 
+
+int checkInBounds(void);
 #endif

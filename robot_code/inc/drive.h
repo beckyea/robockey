@@ -39,3 +39,6 @@ void goToPuck(void);
 void goToGoal(void);
 
 void celebrate(void);
+
+void checkStuckBot(void);
+void setPatrolDirection(void);

@@ -15,6 +15,7 @@
 
 #define DRIVE_ALPHA 0.2
 #define LEFT_OVER_RIGHT 2
+#define SAME_POS_VAL 10
 #define K_P 1
 #define K_I 0
 #define K_D 0
@@ -24,6 +25,7 @@ double omegaPID(double desiredTheta);
 double thetaThreshold = 0.2;
 double integral_theta, preverror_theta, integral_omega, preverror_omega;
 int deltat;
+int patrolDirection = 0; // 0 if patroling w/ pos x velocity, 1 if negative x velocity
 
 int DC_A_desired, DC_B_desired;
 int LeftFor, RightFor = 1;
@@ -139,25 +141,34 @@ void celebrate(void) {
 }
 
 
+void checkStuckBot(void) {
+	if (velX == 0 && velY == 0) { rev_fast(); m_wait(50); }
+}
+
+void setPatrolDirection(void) {
+	if (velX > 0) { patrolDirection = 0; } else { patrolDirection = 1; }
+}
+
 void patrol(void) {
-	if (currBot == OFF1) {
-		if (velX > 0 && posX < maxTraversalX) { 
-			goToPoint(maxTraversalX, patrolYVal); 
-		} else if (velX <= 0  && posX < minTraversalX) {
-			goToPoint(minTraversalX, patrolYVal);
-		} else if (velX == 0 && velY == 0) { rev_fast(); }
-	} else if (currBot == OFF2) {
-		if (velX > 0 && posX < maxTraversalX) { 
-			goToPoint(maxTraversalX, -patrolYVal); 
-		} else if (velX <= 0  && posX < minTraversalX) {
-			goToPoint(minTraversalX, -patrolYVal);
-		} else if (velX == 0 && velY == 0) { rev_fast(); }
-	}
+	int patrolY; 
+	if (currBot == OFF1) { patrolY = patrolYVal; }
+	else { patrolY = -patrolYVal; }
+	// check if reached the turn-around points
+	if ((abs(posX - maxTraversalX) <= SAME_POS_VAL) && (abs(posY - patrolY) <= SAME_POS_VAL)) {
+		patrolDirection = 1; // set patrol in negative x velocity
+ 	} else if ((abs(posX - minTraversalX) <= SAME_POS_VAL) && (abs(posY - patrolY) <= SAME_POS_VAL)) {
+ 		patrolDirection = 0; // set patrol in positive x velocity
+ 	} 
+ 	checkStuckBot();
+ 	// instruct patrol path depending on direction of patrol 
+	if (patrolDirection) { goToPoint(minTraversalX, patrolY); }
+	else { goToPoint(maxTraversalX, patrolY); }
 }
 
 void goToGoal(void) {
 	if (hasPuck()) {
-		goToPoint(offensiveGoalX, 0); // TODO: Change this to follow a go-to-goal with puck (maintains minimum turning radius)
+		if (abs(posY) < goalRange - 5) { goToPoint(offensiveGoalX, posY); }
+		goToPoint(offensiveGoalX, 0);
 	} else { gameState = PATROL; }
 }
 

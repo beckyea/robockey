@@ -245,6 +245,12 @@ void calculateVelocity(void) {
 	omega = (theta - prevTheta) / deltat;
 }
 
+// returns 1 if in bounds, 0 if not in bounds
+int checkInBounds(void) {
+	if (teamColor == RED) { return posX > minTraversalX; }
+	else { return posX < minTraversalX; }
+}
+
 /* Gets x as seen in unsigned bits */
 unsigned int loc_getX() { return posX + 115; }
 
