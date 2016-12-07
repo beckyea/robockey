@@ -26,7 +26,7 @@ B3 = [0 0 0];
 handle = serial('/dev/tty.usbmodem411','Baudrate', 9600, 'Parity','none');
 %handle.InputBufferSize = 20;
 fclose(instrfind);
-buffer = zeros(3,1);
+buffer = zeros(4,1);
 bufferindex = 0;
 while true
     fopen(handle);
@@ -67,7 +67,7 @@ while true
 %             y = y * scaleFactor + 120/2;
             disp([x y t])
             plot(x, y, 'o', 'MarkerFaceColor', 'm' , 'MarkerSize', bot_r * 2);
-            line([x, (bot_r * cosd(t) + x)], [y, (bot_r * sind(t) + y)]);
+            line([x, (-bot_r *sind(t) + x)], [y, (bot_r * cosd(t) + y)]);
             drawnow
         end
     end

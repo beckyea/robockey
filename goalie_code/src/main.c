@@ -12,28 +12,21 @@
 #include "vals.h"
 #include "drive.h"
 #include "puckfind.h"
-#include "clock.h"
 
 #define LED_FLASH_TIME 50
 
-enum Bot currBot = OFF1;    // CHANGE THIS VALUE WHEN FLASHING CODE TO DIFFERENT BOTS
+enum Bot currBot = GOALIE; 
 
 // INITIALIZE VALUES
 enum Color teamColor = RED;	// team color, from defined enum, either RED or BLUE
-char ROBOT_ADDRESS = 0x18;	// mRF address for robot communication
+char ROBOT_ADDRESS = (char) 0x1A;	// mRF address for robot communication
 int posX = 500;			    // x position of robot, from -115 to 115
 int posY = 500;			    // y position of robot, from -60 to 60
 double theta = 0;		    // angle of robot from global frame
 double rangeVal = 0;	    // higher number means closer to bot
 double puckAngle = 0;	    // angle from the perpendicular 
-int defensiveGoalX = 115;  // x position of goal you're defending
-int offensiveGoalX = -115;   // x position of goal you're attacking
-int minTraversalX = -patrolXRange; // x position of goal you're defending
-int maxTraversalX = patrolXRange; // x position of goal you're attacking
-int ourScore = 0;		   // score of your team
-int otherScore = 0;		   // score of the other team
-long time = 0;   		   // total amount of time elapsed (milli-seconds)
-enum State gameState = GO_TO_GOAL;
+int defensiveGoalX = -115;  // x position of goal you're defending
+enum State gameState = NOT_IN_PLAY;
 char buffer[10];
 
 void readBuffer();
@@ -43,37 +36,24 @@ int main() {
 	init_all();
 	drive_init();
 	m_clockdivide(0);
-	setAmbient();
-	clock_init();
-	gameState = GO_TO_GOAL;
 	while (true) {
 		switch (gameState) {
 			case(NOT_IN_PLAY): 
 				stop(); 
 				break;
-			case (PATROL):
+			case (SEES_LEFT):
 				loc_readWii();
 				puck_getADCValues();
-				patrol();
+				left();
 				break;
-			case (GO_TO_PUCK):
+			case (SEES_RIGHT):
 				loc_readWii();
 				puck_getADCValues();
-				goToPuck(); 
+				right(); 
 				break;
-			case (GO_TO_GOAL):
+			case (GO_CENTER):
 				loc_readWii();
-				goToGoal(); 
-				break;
-			case (HALF_PATROL):
-				loc_readWii();
-				puck_getADCValues();
-				patrol();
-				break;
-			case (GO_TO_BOX_CORNER):
-				loc_readWii();
-				puck_getADCValues();
-				// TO DO - SET POINT TO GO TO
+				goToCenter(); 
 				break;
 		}
 	}
@@ -96,25 +76,18 @@ void readBuffer() {
 			if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
 			else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
 			init_setGoal();
-			gameState = GO_TO_PUCK;
-			clock_reset();
+			gameState = GO_CENTER;
 			break;
 		case 0xA2: // Goal R
-			if (teamColor == RED) { ourScore = buffer[1]; otherScore = buffer[2]; celebrate(); }
-			else { ourScore = buffer[2]; otherScore = buffer[1]; }
 			gameState = NOT_IN_PLAY;
 			break;
 		case 0xA3: // Goal B
-			if (teamColor == BLUE) { ourScore = buffer[2]; otherScore = buffer[1]; celebrate(); }
-			else { ourScore = buffer[1]; otherScore = buffer[2]; }
 			gameState = NOT_IN_PLAY;
 			break;
 		case 0xA4: // Pause
 			gameState = NOT_IN_PLAY;
 			break;
 		case 0xA5: // Halftime
-			// if (teamColor == RED) { clear (PORTC, 6); m_wait(100); set(PORTC, 6); teamColor = BLUE; }
-			// else { clear(PORTC, 7); m_wait(100);  set(PORTC, 7); teamColor = RED; }
 			gameState = NOT_IN_PLAY;
 			break;
 		case 0xA6: // Game Over

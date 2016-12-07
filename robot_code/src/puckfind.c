@@ -61,7 +61,7 @@ void puck_findAngle(void) {
 	} else { 
 		gameState = GO_TO_PUCK;
 		set(PORTB, 0);
-		if (PTs[Down] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) {
+		if (PTs[Down] >= MAX_THRESHOLD && PTs[InnerLeft] >= MAX_THRESHOLD && PTs[InnerRight] >= MAX_THRESHOLD) {
 				puckAngle = 0;
 				gameState = GO_TO_GOAL;
 		} else if (PTs[TopLeft] > MAX_THRESHOLD && PTs[TopRight] > MAX_THRESHOLD && PTs[InnerLeft] > MAX_THRESHOLD && PTs[InnerRight] > MAX_THRESHOLD) { 
@@ -113,7 +113,7 @@ double approxAngle(double range, int val1, int val2) {
 // normalizes PTs by 
 void normalizePTs(void) {
 	int i;
-	for (i = 0; i < NUM_PTS - 1; i++) { // SUBTRACT 1 from NUM_PTS IN REAL VERSION
+	for (i = 0; i < NUM_PTS; i++) { // SUBTRACT 1 from NUM_PTS IN REAL VERSION
 		if (PTs[i] - ptNoise < 0) { PTs[i] = 0; }
 		else { PTs[i] = PTs[i] - ptNoise; }
 	}
@@ -124,7 +124,7 @@ void setAmbient(void) {
 	ptNoise = PTs[Back] < PTs[Left]  ?  PTs[Back] : PTs[Left];
 	ptNoise = ptNoise   < PTs[Right] ?  ptNoise	  : PTs[Right];
 	maxPTval = 1023 - ptNoise;
-	MAX_THRESHOLD = maxPTval;
+	MAX_THRESHOLD = maxPTval - 10;
 }
 
 ISR(ADC_vect){ //Call Interrupt when conversion completes
@@ -137,10 +137,10 @@ ISR(ADC_vect){ //Call Interrupt when conversion completes
 	else ADC_Check ++;
 
 	switch(ADC_Check){ //Switch case to iterate through phototransistors
-		case 0: // Set ADC to F0
-		clear(ADCSRB,MUX5);
+		case 0: // Set ADC to D7
+		set(ADCSRB,MUX5);
 		clear(ADMUX,MUX2);
-		clear(ADMUX,MUX1);
+		set(ADMUX,MUX1);
 		clear(ADMUX,MUX0);
 		break;
 		case 1: // Set ADC to F1

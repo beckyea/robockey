@@ -8,11 +8,11 @@
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define SQ(x) ((x) * (x))
 
-#define XSHIFT 512
-#define YSHIFT 384
+#define XSHIFT 535
+#define YSHIFT 340
 #define ALPHA .8
-#define POS_THRESHOLD 20
-double scaleFactor = 0.31;
+#define POS_THRESHOLD 50
+double scaleFactor = 0.32;
 
 unsigned int blobs[12];
 char recievedWii;
@@ -20,18 +20,12 @@ char recievedWii;
 int prevPosX = 500;
 int prevPosY = 500;
 double prevTheta = 0;
-long prevTime = 0;
-int deltat = 0;
-double velX = 0;
-double velY = 0;
-double omega = 0;
 
 void set4Pts(int x[], int y[]);
 void set3Pts(int x[], int y[]);
 void findOrientation();
 void readStars();
 void lowPassPosition();
-void calculateVelocity();
 
 /* Reads the Wii. Begins execution of localization */
 char loc_readWii() {
@@ -219,7 +213,7 @@ void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 	if (theta2 > 3.1416) { theta2 -= 2 * 3.1416; }
 	posX = -(int) (dist2center*cos(theta2) * scaleFactor);
 	posY = -(int) (dist2center*sin(theta2) * scaleFactor);
-	theta = theta + 3.1416;
+	theta = atan2((Dy - By), (Dx - Bx)) + 3.1416;
 	if (theta > 3.1416) { theta -= 2 * 3.1416; }
 	lowPassPosition();
 }
@@ -234,22 +228,14 @@ void lowPassPosition(void) {
 		posX = prevPosX;
 		posY = prevPosY;
 		theta = prevTheta;
-		calculateVelocity();
 	}
-	// m_usb_tx_uint(5555); m_usb_tx_string(",");
+	// m_usb_tx_uint(5555); m_usb_tx_string(","); m_usb_tx_push();
 	// m_usb_tx_int((int) (posX));
 	// m_usb_tx_string(",");
 	// m_usb_tx_int((int) (posY));
 	// m_usb_tx_string(",");
 	// m_usb_tx_int((int) (theta * 100));
-	// m_usb_tx_string("\n"); m_usb_tx_push();
-}
-
-void calculateVelocity(void) {
-	deltat = time - prevTime;
-	velX = (posX - prevPosX) / deltat;
-	velY = (posY - prevPosY) / deltat;
-	omega = (theta - prevTheta) / deltat;
+	// m_usb_tx_string("\n");
 }
 
 /* Gets x as seen in unsigned bits */

@@ -6,7 +6,9 @@
 #include "initialization.h"
 #include "vals.h"
 #include "m_general.h"
+#include "m_usb.h"
 #include "drive.h"
+#include "puckfind.h"
 #include <stdlib.h>
 
 #define MOTOR_PORT PORTB
@@ -18,11 +20,13 @@
 #define K_D 0
 
 double thetaPID(double desiredTheta);
+double omegaPID(double desiredTheta);
 double thetaThreshold = 0.2;
-double integral, preverror;
+double integral_theta, preverror_theta, integral_omega, preverror_omega;
 int deltat;
 
 int DC_A_desired, DC_B_desired;
+int LeftFor, RightFor;
 
 void setLeftFwd(void);
 void setLeftRev(void);
@@ -36,61 +40,104 @@ void drive_init(void) {
 	set(DDRB,MOTOR_EN); // Define output pins for Motor Control
 }
 
-void setLeftFwd(void)  { if (!check(PORTB, 3)) { drive_init(); } set(PORTC, 7);   clear(PORTC, 6); }
-void setLeftRev(void)  { if (!check(PORTB, 3)) { drive_init(); } clear(PORTC, 7); set(PORTC, 6);   }
-void setRightFwd(void) { if (!check(PORTB, 3)) { drive_init(); } set(PORTB, 5);   clear(PORTB, 6); }
-void setRightRev(void) { if (!check(PORTB, 3)) { drive_init(); } clear(PORTB, 5); set(PORTB, 6);   }
+void setLeftFwd(void)  { if (!check(PINB, 3)) { drive_init(); } set(PORTC, 7);   clear(PORTC, 6); LeftFor = 1;}
+void setLeftRev(void)  { if (!check(PINB, 3)) { drive_init(); } clear(PORTC, 7); set(PORTC, 6);   LeftFor = 0;}
+void setRightFwd(void) { if (!check(PINB, 3)) { drive_init(); } set(PORTB, 6);   clear(PORTB, 5); RightFor = 1;}
+void setRightRev(void) { if (!check(PINB, 3)) { drive_init(); } clear(PORTB, 6); set(PORTB, 5);   RightFor =0;}
 void stop(void)        { clear(DDRB, MOTOR_EN); }
 
 // Set Desired Duty Cycle
-void fwd_fast(void) { DC_A_desired = 100;  DC_A_desired = 100;  setDrive(); }
-void fwd_slow(void) { DC_A_desired = 50;   DC_B_desired = 50;   setDrive(); }
-void rev_fast(void) { DC_A_desired = -100; DC_B_desired = -100; setDrive(); }
-void rev_slow(void) { DC_A_desired = -50;  DC_B_desired = -50;  setDrive(); }
-void right(void)    { DC_A_desired = 50;   DC_B_desired = 25;   setDrive(); }
-void left(void)     { DC_A_desired = 25;   DC_B_desired = 50;   setDrive(); }
-void right_ip(void) { DC_A_desired = 50;   DC_B_desired = -50;  setDrive(); }
-void left_ip(void)  { DC_A_desired = -50;  DC_B_desired = 50;   setDrive(); }
+void fwd_fast(void)  { DC_A_desired = 100;  DC_B_desired = 100;  setDrive(); }
+void fwd_slow(void)  { DC_A_desired = 50;   DC_B_desired = 50;   setDrive(); }
+void rev_fast(void)  { DC_A_desired = -100; DC_B_desired = -100; setDrive(); }
+void rev_slow(void)  { DC_A_desired = -50;  DC_B_desired = -50;  setDrive(); }
+void right(void)     { DC_A_desired = 50;   DC_B_desired = 25;   setDrive(); }
+void left(void)      { DC_A_desired = 25;   DC_B_desired = 50;   setDrive(); }
+void right_slow(void){ DC_A_desired = 25;   DC_B_desired = 12;   setDrive(); }
+void left_slow(void) { DC_A_desired = 12;   DC_B_desired = 25;   setDrive(); }
+void right_ip(void)  { DC_A_desired = 50;   DC_B_desired = -50;  setDrive(); }
+void left_ip(void)   { DC_A_desired = -50;  DC_B_desired = 50;   setDrive(); }
 
 void setDrive(void) {
 	int DC_A_curr, DC_B_curr;
 	// determine current duty cycle
-	if (check(PINC, 7)) { DC_A_curr = OCR4A*100/255; }
-	else { DC_A_curr = 100 - OCR4A*100/255; }
-	if (check(PINB, 5)) { DC_B_curr = OCR4B*100/255; }
-	else { DC_B_curr = OCR4B*100/255;  }
+	if (LeftFor) { DC_A_curr = OCR4A*100.0/255; }
+	else { DC_A_curr = 100 - OCR4A*100.0/255; }
+	if (RightFor) { DC_B_curr = OCR4B*100.0/255; }
+	else { DC_B_curr = 100 - OCR4B*100.0/255;  }
 	// low pass filter the duty cycles to determine desired duty cycle
 	DC_A_curr = (int) (DC_A_curr * DRIVE_ALPHA + (1 - DRIVE_ALPHA) * DC_A_desired);
 	DC_B_curr = (int) (DC_B_curr * DRIVE_ALPHA + (1 - DRIVE_ALPHA) * DC_B_desired);
 	// determine whether bot is going forward or reverse, set OCR values
-	if (DC_A_curr > 0) { setLeftFwd(); OCR4A = DC_A_curr * 255 / 100; }
-	else if (DC_A_curr < 0) { setLeftRev(); OCR4A = 255 + DC_A_curr * 255 / 100; }
+	if (DC_A_curr > 0) { setLeftFwd(); OCR4A = DC_A_curr * 255 / 100.0; }
+	else if (DC_A_curr < 0) { setLeftRev(); OCR4A = 255 + DC_A_curr * 255 / 100.0; }
 	else { setLeftFwd(); OCR4A = 0; }
-	if (DC_B_curr > 0) { setRightFwd(); OCR4B = DC_B_curr * 255 / 100; }
-	else if (DC_B_curr < 0) { setRightRev(); OCR4B = 255 + DC_B_curr * 255 / 100; }
+	if (DC_B_curr > 0) { setRightFwd(); OCR4B = DC_B_curr * 255 / 100.0; }
+	else if (DC_B_curr < 0) { setRightRev(); OCR4B = 255 + DC_B_curr * 255 / 100.0; }
 	else { setRightFwd(); OCR4B = 0; }
 }
 
 // Test Code to test Motor Controller
 void drive_test(void) {
-	fwd_fast();
-	m_wait(1000);
-	rev_slow();
-	m_wait(1000);
-	right();
-	m_wait(1000);
-	left();
-	m_wait(1000);
-	stop();
+	int i = 500;
+	m_usb_tx_string("\nfwd");
+	m_usb_tx_string("\tOCR4A:");
+	m_usb_tx_int(OCR4A);
+	m_usb_tx_string("\tOCR4B:");
+	m_usb_tx_int(OCR4B);
+	while ( i > 0) {
+		rev_fast();  i--;
+		
+	}
+	// i = 500;
+	// m_usb_tx_string("\nrev");
+	// m_usb_tx_string("\tOCR4A:");
+	// m_usb_tx_int(OCR4A);
+	// m_usb_tx_string("\tOCR4B:");
+	// m_usb_tx_int(OCR4B);
+	// while ( i > 0) {
+	// 	rev_fast(); i--;
+		
+	// }
+	// i = 500;
+	// m_usb_tx_string("\nright");
+	// m_usb_tx_string("\tOCR4A:");
+	// m_usb_tx_int(OCR4A);
+	// m_usb_tx_string("\tOCR4B:");
+	// m_usb_tx_int(OCR4B);
+	// while ( i > 0) {
+	// 	right(); i--;
+		
+	// }
+	// i = 500;
+	// m_usb_tx_string("\nleft");
+	// m_usb_tx_string("\tOCR4A:");
+	// m_usb_tx_int(OCR4A);
+	// m_usb_tx_string("\tOCR4B:");
+	// m_usb_tx_int(OCR4B);
+	// while ( i > 0) {
+	// 	left(); i--;
+		
+	// }
 }
 
 // Returns Output of PID comparison on Omega
 double thetaPID(double desiredTheta) {
 	double error, output;
 	error = desiredTheta - theta;
-	integral += error * deltat;
-	output = K_P * error + K_I * integral + K_D * (error - preverror)/deltat;
-	preverror = error;
+	integral_theta += error * deltat;
+	output = K_P * error + K_I * integral_theta + K_D * (error - preverror_theta)/deltat;
+	preverror_theta = error;
+	return output;
+}
+
+// Returns Output of PID comparison on Omega
+double omegaPID(double desiredOmega) {
+	double error, output;
+	error = desiredOmega - omega;
+	integral_omega += error * deltat;
+	output = K_P * error + K_I * integral_omega + K_D * (error - preverror_omega)/deltat;
+	preverror_theta = error;
 	return output;
 }
 
@@ -141,9 +188,10 @@ void patrol(void) {
 }
 
 void goToPuck(void) {
+	puck_findAngle();
 	if (puckAngle < .08 || puckAngle > 6.2) { fwd_fast(); }
-	else if (puckAngle < 3.1416) { right_ip(); }
-	else { left_ip(); }
+	else if (puckAngle < 3.1416) { right_slow(); }
+	else { left_slow(); }
 }
 
 void goToGoal(void) {
@@ -160,20 +208,22 @@ int goToPoint(int x, int y) {
 		stop();
 		return 1;
 	} else if ((theta_temp - thetaToPos) > .5) {
+		m_usb_tx_string("r");
 		right();
 	} else if ((thetaToPos - theta_temp) > .5) {
+		m_usb_tx_string("l");
 		left();
 	} else { fwd_fast(); }
-	// m_usb_tx_int((int) (posX));
-	// m_usb_tx_string("\t");
-	// m_usb_tx_int((int) (posY));
-	// m_usb_tx_string("\t");
-	// m_usb_tx_int((int) (theta_temp*1000));
-	// m_usb_tx_string("\t");
-	// m_usb_tx_int((int) (thetaToPos*1000));
-	// m_usb_tx_string("\t");
-	// m_usb_tx_int((int) ((theta_temp - thetaToPos)*100));
-	// m_usb_tx_string("\n");
+	m_usb_tx_string("\nx:");
+	m_usb_tx_int((int) (posX));
+	m_usb_tx_string("\ty:");
+	m_usb_tx_int((int) (posY));
+	m_usb_tx_string("\ttheta:");
+	m_usb_tx_int((int) (theta_temp*1000));
+	m_usb_tx_string("\ttheta2goal:");
+	m_usb_tx_int((int) (thetaToPos*1000));
+	m_usb_tx_string("\tdiff:");
+	m_usb_tx_int((int) ((theta_temp - thetaToPos)*1000));
 	return 0;
 }
 

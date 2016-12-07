@@ -13,8 +13,6 @@ int puck_getADCValues(void);
 // FUCTION: Finds the puck position based on ADC Input Values
 // RETURNS: 1 if values read; 0 if values not read
 
-void puck_findAngle(void);
-
 void setAmbient(void);
 
 
