@@ -35,21 +35,9 @@ void calculateVelocity();
 
 /* Reads the Wii. Begins execution of localization */
 char loc_readWii() {
-	//m_green(ON);
 	recievedWii = m_wii_read(blobs);
 	if (recievedWii) { 
 		readStars(); 
-		// UNCOMMENT BELOW TO USE VISUALIZER
-		// m_usb_tx_uint(5555); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[0]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[1]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[3]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[4]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[6]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[7]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[9]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_uint(blobs[10]); m_usb_tx_string(","); m_usb_tx_push();
-		// m_usb_tx_string("\n"); m_usb_tx_push();
 	}
 	return recievedWii;
 }
@@ -225,7 +213,12 @@ void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 }
 
 void lowPassPosition(void) {
-	if (prevPosX == 500 && prevPosY == 500) { } // Covers case in which no position has been found yet. Contirnue to use previous value
+	if (prevPosX == 500 && prevPosY == 500) { 
+		deltat = time - prevTime;
+		posX = prevPosX + velX * deltat ;
+		posY = prevPosY + velY * deltat;
+		theta = prevTheta + omega * deltat;
+	} // Covers case in which no position has been found yet. Contirnue to use previous value
 	else if (abs(posX - prevPosX) < POS_THRESHOLD || abs(posY - prevPosY) < POS_THRESHOLD) {
 		posX = prevPosX * ALPHA + posX * (1 - ALPHA);
 		posY = prevPosY * ALPHA + posY * (1 - ALPHA);
@@ -262,7 +255,7 @@ unsigned int loc_getY() { return posY + 60; }
 unsigned int loc_getT() { return (unsigned int) (theta * 100); }
 
 /* Determines side of court */
-char loc_getSide() { 
-	if (posX < 0) { return 1; } // Left side
-	else { return 2; } // Right side
+enum Color loc_getSide() { 
+	if (posX < 0) { return RED; } // Left side
+	else { return BLUE; } // Right side
 }

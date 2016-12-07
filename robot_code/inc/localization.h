@@ -30,7 +30,7 @@ unsigned int loc_getT(void);
 // TAKES: nothing
 // RETURNS: 100 * the angle from the positive x axis in radians
 
-char loc_getSide(void);
+enum Color loc_getSide(void);
 // FUNCTIONALITY: Determines side of the field, used for initial positioning
 // TAKES: nothing
 // RETURNS: 0 if no data, 1 if left side, 2 if right side

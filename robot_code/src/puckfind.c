@@ -17,6 +17,8 @@ int ADC_Check = 0; //incr through pt channels
 int ptNoise = 0; // ambient noise
 int maxPTval = 1023; // maximum PT reading after removing ambient
 
+int maxPT1, maxPT2;
+
 int hasPuckThreshold = 20;
 int noiseThreshold;
 int closeThreshold = 40;
@@ -49,6 +51,18 @@ int puck_getADCValues(void) {
 	return 0;
 }
 
+// Returns 1 if the puck is seen; 0 if not
+int seesPuck(void) {
+	int i; maxPT1 = 0; maxPT2 = 1; 
+	for (i = 1; i < NUM_PTS; i++) { 
+		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
+		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
+	}
+	if (PTs[maxPT1] > noiseThreshold) { set(PORTB, 0); return 1; }
+	else { clear(PORTB, 0); return 0; }
+}
+
+// Returns 1 if the bot has the puck; 0 if not
 int hasPuck(void) { 
 	return (PTs[Down] >= hasPuckThreshold && PTs[InnerRight] > 600 && PTs[InnerLeft] > 600);
 }
@@ -60,31 +74,25 @@ void setDriveToPuck(void) {
 		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
 		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
 	}
-	if (Back == Left) { maxPT1 = Left; }
-	if (Back == Right) { maxPT1 = Right; }
-	if (hasPuck()) { // has the puck
-		set(PORTB, 0); stop(); m_usb_tx_string("GO TO GOAL"); gameState = GO_TO_GOAL;
-	} else if (PTs[maxPT1] <= noiseThreshold) { // noise
-		clear(PORTB, 0); m_usb_tx_string("PATROL");  m_usb_tx_int(PTs[maxPT1]); gameState = PATROL;
-	} else if (PTs[maxPT1]== TopLeft && (PTs[TopLeft] > PTs[TopRight])) {
-		set(PORTB, 0); left_slow();if (time % 10 == 0) {  m_usb_tx_string("left1"); }gameState = GO_TO_PUCK;
+	if (PTs[Back] == PTs[Left]) { maxPT1 = Left; }
+	if (PTs[Back] == PTs[Right]) { maxPT1 = Right; }
+	if (PTs[maxPT1]== TopLeft && (PTs[TopLeft] > PTs[TopRight])) {
+		left_slow(); if (time % 10 == 0) {  m_usb_tx_string("left1"); }
 	} else if (maxPT1 == TopRight && (PTs[TopRight] > PTs[TopLeft])) {
-		set(PORTB, 0); right_slow(); if (time % 10 == 0) { m_usb_tx_string("right1");  }gameState = GO_TO_PUCK;
-	} else if (abs(PTs[InnerRight] - PTs[InnerLeft]) < 10 && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {
-		set(PORTB, 0); fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd1"); }gameState = GO_TO_PUCK;
+		right_slow(); if (time % 10 == 0) { m_usb_tx_string("right1");  }
+	} else if (abs(PTs[InnerRight] - PTs[InnerLeft]) < 5 && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {
+		fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd1"); }
 	} else {
 		switch(maxPT1) {
 			case Back: right_ip(); if (time % 10 == 0) { m_usb_tx_string("back2");} break;
-			case Right: if (PTs[Right] < closeThreshold) { right(); } else { right_ip(); } if (time % 10 == 0) { m_usb_tx_string("right2"); }break;
-			case Left: if (PTs[Left] < closeThreshold) { left(); } else { left_ip(); } if (time % 10 == 0) { m_usb_tx_string("left2"); }break;
-			case TopLeft: left(); if (time % 10 == 0) { m_usb_tx_string("left3"); }break;
+			case Right: if (PTs[Right] < closeThreshold) { right(); } else { right_ip(); } if (time % 10 == 0) { m_usb_tx_string("right2"); } break;
+			case Left: if (PTs[Left] < closeThreshold) { left(); } else { left_ip(); } if (time % 10 == 0) { m_usb_tx_string("left2"); } break;
+			case TopLeft: left(); if (time % 10 == 0) { m_usb_tx_string("left3"); } break;
 			case TopRight: right();if (time % 10 == 0) { m_usb_tx_string("right3"); } break;
-			case InnerLeft: left(); if (time % 10 == 0) { m_usb_tx_string("left4"); }break;
-			case InnerRight: right();if (time % 10 == 0) { m_usb_tx_string("right4"); } break;
-			default: fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd3"); }break;
+			case InnerLeft: left(); if (time % 10 == 0) { m_usb_tx_string("left4"); } break;
+			case InnerRight: right(); if (time % 10 == 0) { m_usb_tx_string("right4"); } break;
+			default: fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd3"); } break;
 		}
-		set(PORTB, 0);
-		gameState = GO_TO_PUCK;
 	}
 }
 

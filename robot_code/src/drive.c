@@ -53,8 +53,8 @@ void rev_fast(void)  { DC_A_desired = -100; DC_B_desired = -100; setDrive(); }
 void rev_slow(void)  { DC_A_desired = -75;  DC_B_desired = -75;  setDrive(); }
 void right(void)     { DC_A_desired = 85;   DC_B_desired = 65;   setDrive(); }
 void left(void)      { DC_A_desired = 65;   DC_B_desired = 85;   setDrive(); }
-void right_slow(void){ DC_A_desired = 60;   DC_B_desired = 25;   setDrive(); }
-void left_slow(void) { DC_A_desired = 25;   DC_B_desired = 60;   setDrive(); }
+void right_slow(void){ DC_A_desired = 60;   DC_B_desired = 30;   setDrive(); }
+void left_slow(void) { DC_A_desired = 30;   DC_B_desired = 60;   setDrive(); }
 void right_ip(void)  { DC_A_desired = 70;   DC_B_desired = -60;  setDrive(); }
 void left_ip(void)   { DC_A_desired = -60;  DC_B_desired = 70;   setDrive(); }
 
@@ -83,45 +83,10 @@ void setDrive(void) {
 // Test Code to test Motor Controller
 void drive_test(void) {
 	int i = 500;
-	m_usb_tx_string("\nfwd");
-	m_usb_tx_string("\tOCR4A:");
-	m_usb_tx_int(OCR4A);
-	m_usb_tx_string("\tOCR4B:");
-	m_usb_tx_int(OCR4B);
 	while ( i > 0) {
 		rev_fast();  i--;
 		
 	}
-	// i = 500;
-	// m_usb_tx_string("\nrev");
-	// m_usb_tx_string("\tOCR4A:");
-	// m_usb_tx_int(OCR4A);
-	// m_usb_tx_string("\tOCR4B:");
-	// m_usb_tx_int(OCR4B);
-	// while ( i > 0) {
-	// 	rev_fast(); i--;
-		
-	// }
-	// i = 500;
-	// m_usb_tx_string("\nright");
-	// m_usb_tx_string("\tOCR4A:");
-	// m_usb_tx_int(OCR4A);
-	// m_usb_tx_string("\tOCR4B:");
-	// m_usb_tx_int(OCR4B);
-	// while ( i > 0) {
-	// 	right(); i--;
-		
-	// }
-	// i = 500;
-	// m_usb_tx_string("\nleft");
-	// m_usb_tx_string("\tOCR4A:");
-	// m_usb_tx_int(OCR4A);
-	// m_usb_tx_string("\tOCR4B:");
-	// m_usb_tx_int(OCR4B);
-	// while ( i > 0) {
-	// 	left(); i--;
-		
-	// }
 }
 
 // Returns Output of PID comparison on Omega

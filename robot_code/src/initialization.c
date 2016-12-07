@@ -21,7 +21,7 @@ void init_all (void) {
 	set(DDRB, 2); // Configure B2 for output -- Positioning LED, BLUE
 	set(DDRB, 0); // Configure B0 for output -- Yellow LED
 	init_setRobot();
-	//init_mwii();
+	init_mwii();
 	init_mrf();
 	init_driver();
 	init_adc();

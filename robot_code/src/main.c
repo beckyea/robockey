@@ -38,7 +38,6 @@ char buffer[10];
 
 void readBuffer();
 
-// Main Function
 int main() {
 	init_all();
 	drive_init();
@@ -47,35 +46,27 @@ int main() {
 	clock_init();
 	gameState = PATROL;
 	while (true) {
+		loc_readWii();
+		puck_getADCValues();
 		switch (gameState) {
 			case(NOT_IN_PLAY): 
 				stop(); 
 				break;
 			case (PATROL):
-				//loc_readWii();
-				puck_getADCValues();
-				setDriveToPuck();
-				patrol();
+				if (seesPuck()) { gameState = GO_TO_PUCK; }
+				else { patrol(); }
 				break;
 			case (GO_TO_PUCK):
-				//loc_readWii();
-				puck_getADCValues();
-				setDriveToPuck();
+				if (!seesPuck()) { gameState = PATROL; }
+				else if (hasPuck()) { gameState = GO_TO_GOAL; }
+				else { setDriveToPuck(); }
 				break;
 			case (GO_TO_GOAL):
-				loc_readWii();
-				puck_getADCValues();
-				stop();//goToGoal(); 
+				if (!hasPuck() && !seesPuck()) { gameState = PATROL; }
+				else if (!hasPuck()) { gameState = GO_TO_PUCK; }
+				else { goToGoal(); }
 				break;
-			case (HALF_PATROL):
-				loc_readWii();
-				puck_getADCValues();
-				patrol();
-				break;
-			case (GO_TO_BOX_CORNER):
-				loc_readWii();
-				puck_getADCValues();
-				// TO DO - SET POINT TO GO TO
+			default:
 				break;
 		}
 	}
@@ -88,7 +79,6 @@ void readBuffer() {
 		case 0xA0 : // Communication Test
 			loc_readWii();
 			teamColor = loc_getSide();
-			init_setGoal();
 			if (teamColor == RED) { set(PORTB, 1); m_wait(LED_FLASH_TIME); clear(PORTB, 2); } 
 			else if (teamColor == BLUE) { set(PORTB, 2); m_wait(LED_FLASH_TIME); clear(PORTB, 1); }
 			break;
@@ -115,8 +105,6 @@ void readBuffer() {
 			gameState = NOT_IN_PLAY;
 			break;
 		case 0xA5: // Halftime
-			// if (teamColor == RED) { clear (PORTC, 6); m_wait(100); set(PORTC, 6); teamColor = BLUE; }
-			// else { clear(PORTC, 7); m_wait(100);  set(PORTC, 7); teamColor = RED; }
 			gameState = NOT_IN_PLAY;
 			break;
 		case 0xA6: // Game Over
@@ -124,18 +112,6 @@ void readBuffer() {
 			gameState = NOT_IN_PLAY;
 			break;
 	}
-}
-
-ISR(TIMER4_COMPA_vect){    //PWM signal goes low
-	clear(PORTB,MOTOR_EN);
-	clear(PORTB,5);
-	clear(PORTB,6);
-}
-
-ISR(TIMER4_COMPB_vect){   //PWM signal goes high
-	set(PORTB,MOTOR_EN);
-	set(PORTB,5);
-	set(PORTB,6);
 }
 
 // Interrupt to Handle mRF Communication
