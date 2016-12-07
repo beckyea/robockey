@@ -55,8 +55,8 @@ void right(void)     { DC_A_desired = 50;   DC_B_desired = 25;   setDrive(); }
 void left(void)      { DC_A_desired = 25;   DC_B_desired = 50;   setDrive(); }
 void right_slow(void){ DC_A_desired = 25;   DC_B_desired = 12;   setDrive(); }
 void left_slow(void) { DC_A_desired = 12;   DC_B_desired = 25;   setDrive(); }
-void right_ip(void)  { DC_A_desired = 50;   DC_B_desired = -50;  setDrive(); }
-void left_ip(void)   { DC_A_desired = -50;  DC_B_desired = 50;   setDrive(); }
+void right_ip(void)  { DC_A_desired = 30;   DC_B_desired = -30;  setDrive(); }
+void left_ip(void)   { DC_A_desired = -30;  DC_B_desired = 30;   setDrive(); }
 
 void setDrive(void) {
 	int DC_A_curr, DC_B_curr;
@@ -188,7 +188,7 @@ void patrol(void) {
 }
 
 void goToPuck(void) {
-	puck_findAngle();
+	puck_getADCValues();
 	if (puckAngle < .08 || puckAngle > 6.2) { fwd_fast(); }
 	else if (puckAngle < 3.1416) { right_slow(); }
 	else { left_slow(); }
@@ -208,22 +208,22 @@ int goToPoint(int x, int y) {
 		stop();
 		return 1;
 	} else if ((theta_temp - thetaToPos) > .5) {
-		m_usb_tx_string("r");
+		//m_usb_tx_string("r");
 		right();
 	} else if ((thetaToPos - theta_temp) > .5) {
-		m_usb_tx_string("l");
+		//m_usb_tx_string("l");
 		left();
 	} else { fwd_fast(); }
-	m_usb_tx_string("\nx:");
-	m_usb_tx_int((int) (posX));
-	m_usb_tx_string("\ty:");
-	m_usb_tx_int((int) (posY));
-	m_usb_tx_string("\ttheta:");
-	m_usb_tx_int((int) (theta_temp*1000));
-	m_usb_tx_string("\ttheta2goal:");
-	m_usb_tx_int((int) (thetaToPos*1000));
-	m_usb_tx_string("\tdiff:");
-	m_usb_tx_int((int) ((theta_temp - thetaToPos)*1000));
+	// m_usb_tx_string("\nx:");
+	// m_usb_tx_int((int) (posX));
+	// m_usb_tx_string("\ty:");
+	// m_usb_tx_int((int) (posY));
+	// m_usb_tx_string("\ttheta:");
+	// m_usb_tx_int((int) (theta_temp*1000));
+	// m_usb_tx_string("\ttheta2goal:");
+	// m_usb_tx_int((int) (thetaToPos*1000));
+	// m_usb_tx_string("\tdiff:");
+	// m_usb_tx_int((int) ((theta_temp - thetaToPos)*1000));
 	return 0;
 }
 

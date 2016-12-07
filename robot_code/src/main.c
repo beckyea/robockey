@@ -33,7 +33,7 @@ int maxTraversalX = patrolXRange; // x position of goal you're attacking
 int ourScore = 0;		   // score of your team
 int otherScore = 0;		   // score of the other team
 long time = 0;   		   // total amount of time elapsed (milli-seconds)
-enum State gameState = GO_TO_GOAL;
+enum State gameState = PATROL;
 char buffer[10];
 
 void readBuffer();
@@ -43,23 +43,23 @@ int main() {
 	init_all();
 	drive_init();
 	m_clockdivide(0);
-	setAmbient();
+	//setAmbient();
 	clock_init();
-	gameState = GO_TO_GOAL;
+	gameState = PATROL;
 	while (true) {
 		switch (gameState) {
 			case(NOT_IN_PLAY): 
 				stop(); 
 				break;
 			case (PATROL):
-				loc_readWii();
+				//loc_readWii();
 				puck_getADCValues();
-				patrol();
+				//patrol();
 				break;
 			case (GO_TO_PUCK):
 				loc_readWii();
 				puck_getADCValues();
-				goToPuck(); 
+				//goToPuck(); 
 				break;
 			case (GO_TO_GOAL):
 				loc_readWii();

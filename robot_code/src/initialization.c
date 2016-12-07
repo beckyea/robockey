@@ -21,7 +21,7 @@ void init_all (void) {
 	set(DDRB, 2); // Configure B2 for output -- Positioning LED, BLUE
 	set(DDRB, 0); // Configure B0 for output -- Yellow LED
 	init_setRobot();
-	init_mwii();
+	//init_mwii();
 	init_mrf();
 	init_driver();
 	init_adc();
@@ -47,10 +47,10 @@ void init_adc(void) {
 	m_disableJTAG(); 
 	clear(ADMUX, REFS0); // Make Vcc the reference voltage
 	set(ADMUX, REFS1);
-	clear(ADCSRA, ADPS2); set(ADCSRA, ADPS1); set(ADCSRA, ADPS0); //Set Clock prescaler to /8 => ADC runs at 125kHz
+	set(ADCSRA, ADPS2); set(ADCSRA, ADPS1); set(ADCSRA, ADPS0); //Set Clock prescaler to /128 => ADC runs at 125kHz
 	//Disable digital on ADC Pins
 	set(DIDR0,ADC0D); // F0
-	set(DIDR0,ADC1D); // F1
+	set(DIDR2,ADC10D); // D7
 	set(DIDR0,ADC4D); // F4
 	set(DIDR0,ADC5D); // F5
 	set(DIDR0,ADC6D); // F6
@@ -71,6 +71,12 @@ void init_driver(void) {
 	set(DDRB,6); //B6 --> D4 (INA2)
 	set(DDRC,7); //C7 --> D8 (INB1)
 	set(DDRB,5); //B5 --> D9 (INB2)
+
+	set(PORTC,6); //C6 --> D7 (INA1)
+	set(PORTB,6); //B6 --> D4 (INA2)
+	set(PORTC,7); //C7 --> D8 (INB1)
+	set(PORTB,5); //B5 --> D9 (INB2)
+
 
 	// Initialize Timer 4
 	set(TCCR4B,CS43); clear(TCCR4B,CS42); clear(TCCR4B,CS41); clear(TCCR4B,CS40);// set timer prescaler to /64
