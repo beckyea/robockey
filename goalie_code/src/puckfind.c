@@ -20,7 +20,6 @@ int maxPTval = 1023; // maximum PT reading after removing ambient
 int MAX_THRESHOLD = 1023;
 
 void printValues(void);
-void puck_setDrive(void);
 void normalizePTs(void);
 double approxAngle(double range, int val1, int val2);
 
@@ -29,16 +28,12 @@ void printValues(void) {
 	m_usb_tx_string("\tFL: ");  m_usb_tx_int(PTs[1]);
 	m_usb_tx_string("\tFR: ");  m_usb_tx_int(PTs[2]);
 	m_usb_tx_string("\tR: ");  m_usb_tx_int(PTs[3]);
-	m_usb_tx_string("\tAngle: "); m_usb_tx_int(puckAngle*180/3.1416);
-	m_usb_tx_string("\tDist: "); m_usb_tx_int(rangeVal * 100);
-	m_usb_tx_string("\tAmbient: "); m_usb_tx_int(ptNoise);
 }
 
 // returns whether values were found
 int puck_getADCValues(void) {
 	if (ADC_Flag != 0) {  //If ADCs are being read
 		clear(ADCSRA,ADEN); // Disable ADC
-		puck_setDrive();
 		printValues(); // COMMENT THIS LINE IN FINAL VERSION
 		ADC_Flag = 0;
 		set(ADCSRA,ADEN); // Re-enable ADC
@@ -48,7 +43,7 @@ int puck_getADCValues(void) {
 	return 0;
 }
 
-void puck_setDrive(void) {
+void puck_drive(void) {
 	normalizePTs();
 	rangeVal = (PTs[Left] + PTs[FrontLeft] + PTs[FrontRight] + PTs[Right]) / 4;
 	if (rangeVal < 0.10) {
@@ -58,9 +53,9 @@ void puck_setDrive(void) {
 		// assume puck is centered in front of the goalie bot
 		stop();
 	} else if (PTs[Left] >= MAX_THRESHOLD || PTs[Left] > PTs[Right]) { 
-		left();
+		gameState = SEES_LEFT; left();
 	} else if (PTs[Right] >= MAX_THRESHOLD || PTs[Right] > PTs[Left]) { 
-		right();
+		gameState = SEES_RIGHT; right();
 	}
 }
 

@@ -19,14 +19,16 @@ void setToLeft(void);
 void setToRight(void);
 void setDrive(void);
 
+int ToLeft;
+
 
 // Initializes the motors
 void drive_init(void) { 
 	set(DDRB,MOTOR_EN); // Define output pins for Motor Control
 }
 
-void setToLeft(void)   { if (!check(PORTB, 3)) { drive_init(); } set(PORTC, 7); clear(PORTC, 6); set(PORTB, 5); set(PORTB, 6); }
-void setToRight(void)  { if (!check(PORTB, 3)) { drive_init(); } clear(PORTC, 7); set(PORTC, 6); clear(PORTB, 5); clear(PORTB, 6);  }
+void setToLeft(void)   { if (!check(PORTB, 3)) { drive_init(); } set(PORTC, 7); clear(PORTC, 6); set(PORTB, 5); clear(PORTB, 6); ToLeft = 1; }
+void setToRight(void)  { if (!check(PORTB, 3)) { drive_init(); } clear(PORTC, 7); set(PORTC, 6); clear(PORTB, 5); set(PORTB, 6);  ToLeft = 0; }
 void stop(void)        { clear(DDRB, MOTOR_EN); }
 
 // Set Desired Duty Cycle
@@ -53,7 +55,7 @@ void goToCenter(void) {
 void setDrive(void) {
 	int DC_A_curr;
 	// determine current duty cycle
-	if (check(PINC, 7)) { DC_A_curr = OCR4A*100/255; }
+	if (ToLeft) { DC_A_curr = OCR4A*100/255; }
 	else { DC_A_curr = 100 - OCR4A*100/255; }
 	// low pass filter the duty cycles to determine desired duty cycle
 	DC_A_curr = (int) (DC_A_curr * DRIVE_ALPHA + (1 - DRIVE_ALPHA) * DC_A_desired);

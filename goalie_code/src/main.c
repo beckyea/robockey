@@ -44,15 +44,18 @@ int main() {
 			case (SEES_LEFT):
 				loc_readWii();
 				puck_getADCValues();
+				puck_drive();
 				left();
 				break;
 			case (SEES_RIGHT):
 				loc_readWii();
 				puck_getADCValues();
+				puck_drive();
 				right(); 
 				break;
 			case (GO_CENTER):
 				loc_readWii();
+				puck_drive();
 				goToCenter(); 
 				break;
 		}

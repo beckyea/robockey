@@ -2,7 +2,7 @@ General Notes regarding Robockey code.
 
 Pin Assignments
 V+   Motor Driver, PWM1 , Motor Driver, PWM2, Motor Driver, +5V
-B4 : 
+B4 : ADC, Phototransistor
 B5 : OCR4B'
 B6 : OCR4B
 C6 : OCR4A'
@@ -28,7 +28,7 @@ D2 : off limits - mRF
 D3 : Motor Driver, ENABLE (A0)
 D4 : ADC, Phototransistor
 D5 : 
-D6 : ADC, Phototransistor
+D6 :
 D7 : ADC, Phototransistor
 
 STATUS LEDS:

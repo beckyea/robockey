@@ -54,16 +54,18 @@ int main() {
 			case (PATROL):
 				//loc_readWii();
 				puck_getADCValues();
-				//patrol();
+				setDriveToPuck();
+				patrol();
 				break;
 			case (GO_TO_PUCK):
-				loc_readWii();
+				//loc_readWii();
 				puck_getADCValues();
-				//goToPuck(); 
+				setDriveToPuck();
 				break;
 			case (GO_TO_GOAL):
 				loc_readWii();
-				goToGoal(); 
+				puck_getADCValues();
+				stop();//goToGoal(); 
 				break;
 			case (HALF_PATROL):
 				loc_readWii();

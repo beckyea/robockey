@@ -14,8 +14,9 @@ int puck_getADCValues(void);
 // RETURNS: 1 if values read; 0 if values not read
 
 void puck_findAngle(void);
-
+void setDriveToPuck(void);
 void setAmbient(void);
+int hasPuck(void);
 
 
 #endif

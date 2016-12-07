@@ -56,7 +56,8 @@ void init_adc(void) {
 	set(DIDR0,ADC6D); // F6
 	set(DIDR0,ADC7D); // F7
 	set(DIDR2,ADC8D); // D4
-	set(DIDR2,ADC9D); // D6
+	// set(DIDR2,ADC9D); // D6
+	set(DIDR2,ADC11D); // B4
 	set(ADCSRA,ADIE); //Enable ADC Interrupt Flag
 	clear(ADCSRA,ADATE); // Disable free-running Mode
 
@@ -82,7 +83,7 @@ void init_driver(void) {
 	set(TCCR4B,CS43); clear(TCCR4B,CS42); clear(TCCR4B,CS41); clear(TCCR4B,CS40);// set timer prescaler to /64
 	clear(TCCR4D,WGM41); clear(TCCR4D,WGM40); // Count UP to OCR4C
 	set(TCCR4A,PWM4A); set(TCCR4A,COM4A1); clear(TCCR4A,COM4A0); //PWM, set at rollover, clear at OCR4A
-	set(TCCR4B,PWM4B); set(TCCR4B,COM4B1); clear(TCCR4B,COM4B0); //PWM, set at rollover, clear at OCR4B
+	set(TCCR4A,PWM4B); set(TCCR4A,COM4B1); clear(TCCR4A,COM4B0); //PWM, set at rollover, clear at OCR4B
 
 	// set(TIMSK4,OCIE4A); //Enable interrupt when TCNT1 = OCR1A
 	// set(TIMSK4,OCIE4B); //Enable interrupt when TCNT1 = OCR1B

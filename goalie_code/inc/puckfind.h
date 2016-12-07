@@ -14,6 +14,6 @@ int puck_getADCValues(void);
 // RETURNS: 1 if values read; 0 if values not read
 
 void setAmbient(void);
-
+void puck_drive(void);
 
 #endif
