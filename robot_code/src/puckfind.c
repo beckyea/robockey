@@ -5,6 +5,7 @@
 #include "m_usb.h"
 #include "puckfind.h"
 #include "vals.h"
+#include "drive.h"
 
 #define NUM_PTS 8
 
@@ -17,13 +18,12 @@ int ptNoise = 0; // ambient noise
 int maxPTval = 1023; // maximum PT reading after removing ambient
 
 int hasPuckThreshold = 1000;
-int noiseThreshold = 10;
+int noiseThreshold;
 int closeThreshold = 400;
 
 void printValues(void);
-void puck_findAngle(void);
+void setDriveToPuck(void);
 void normalizePTs(void);
-double approxAngle(double range, int val1, int val2);
 
 void printValues(void) {
 	m_usb_tx_string("\nTR: "); m_usb_tx_int(PTs[TopRight]);
@@ -58,14 +58,14 @@ void setDriveToPuck(void) {
 		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
 		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
 	}
-	if (PTs[Down] => hasPuckThreshold) { // has the puck
+	if (PTs[Down] >= hasPuckThreshold) { // has the puck
 		set(PORTB, 0); gameState = GO_TO_GOAL; 
 	} else if (maxPT1 <= noiseThreshold) { // noise
 		clear(PORTB, 0); gameState = PATROL;
-	} else if ((maxPT1 == TopLeft && maxPT2 == TopRight) {
-		left_slow();
-	} else if (maxPT1 == TopRight && maxPT2 == TopLeft)) {
-		right_slow();
+	} else if (maxPT1 == TopLeft && maxPT2 == TopRight) {
+		left_slow(); gameState = GO_TO_PUCK;
+	} else if (maxPT1 == TopRight && maxPT2 == TopLeft) {
+		right_slow(); gameState = GO_TO_PUCK;
 	} else {
 		switch(maxPT1) {
 			case Back: if (PTs[Back] < closeThreshold) { right(); } else { right_ip(); } break;
@@ -75,6 +75,7 @@ void setDriveToPuck(void) {
 			case TopRight: right_slow(); break;
 			default: fwd_slow(); break;
 		}
+		gameState = GO_TO_PUCK;
 	}
 }
 
@@ -92,7 +93,7 @@ void setAmbient(void) {
 	ptNoise = PTs[Back] < PTs[Left]  ?  PTs[Back] : PTs[Left];
 	ptNoise = ptNoise   < PTs[Right] ?  ptNoise	  : PTs[Right];
 	maxPTval = 1023 - ptNoise;
-	MAX_THRESHOLD = maxPTval - 10;
+	noiseThreshold = maxPTval - 10;
 }
 
 ISR(ADC_vect){ //Call Interrupt when conversion completes

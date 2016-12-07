@@ -21,6 +21,8 @@ void rev_fast(void);
 void rev_slow(void);
 void right(void);
 void left(void);
+void right_slow(void);
+void left_slow(void);
 void right_ip(void);
 void left_ip(void);
 
