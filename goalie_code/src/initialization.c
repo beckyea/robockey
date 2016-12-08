@@ -31,6 +31,7 @@ void init_mwii(void) {
 	wiiConnected = m_wii_open();
 	while (!wiiConnected) {
 		m_green(ON); // pause device until Wii is connected
+		m_usb_tx_string("here");
 	}
 	m_green(OFF);
 }

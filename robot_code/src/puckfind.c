@@ -9,6 +9,7 @@
 #include "drive.h"
 
 #define NUM_PTS 8
+#define ALPHA 0.4
 
 volatile int ADC_Flag = 0;
 enum PT { TopRight = 5, Right = 6, Back = 1, Left = 7, TopLeft = 4, InnerLeft = 2, InnerRight = 3, Down = 0 };
@@ -17,15 +18,14 @@ int ADC_Check = 0; //incr through pt channels
 
 int ptNoise = 0; // ambient noise
 int maxPTval = 1023; // maximum PT reading after removing ambient
-
+int temp;
 int maxPT1, maxPT2;
 
-int hasPuckThreshold = 20;
-int noiseThreshold;
-int closeThreshold = 40;
+int hasPuckThreshold = 600;
+int noiseThreshold = 20;
+int closeThreshold = 200;
 
 void printValues(void);
-void normalizePTs(void);
 
 void printValues(void) {
 	m_usb_tx_string("\nTR: "); m_usb_tx_int(PTs[TopRight]);
@@ -43,10 +43,10 @@ void printValues(void) {
 int puck_getADCValues(void) {
 	if (ADC_Flag != 0) {  //If ADCs are being read
 		clear(ADCSRA,ADEN); // Disable ADC
-		if (time % 10 == 0) { printValues(); } // COMMENT THIS LINE IN FINAL VERSION }
 		ADC_Flag = 0;
 		set(ADCSRA,ADEN); // Re-enable ADC
 		set(ADCSRA,ADSC); // Start next conversion
+		if (time % 10 == 0) { printValues(); }
 		return 1;
 	}
 	return 0;
@@ -56,8 +56,8 @@ int puck_getADCValues(void) {
 int seesPuck(void) {
 	int i; maxPT1 = 0; maxPT2 = 1; 
 	for (i = 1; i < NUM_PTS; i++) { 
-		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
-		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
+			if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
+			else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
 	}
 	if (PTs[maxPT1] > noiseThreshold) { set(PORTB, 0); return 1; }
 	else { clear(PORTB, 0); return 0; }
@@ -65,26 +65,31 @@ int seesPuck(void) {
 
 // Returns 1 if the bot has the puck; 0 if not
 int hasPuck(void) { 
-	return (PTs[Down] >= hasPuckThreshold && PTs[InnerRight] > 600 && PTs[InnerLeft] > 600);
+	if (PTs[Down] >= hasPuckThreshold && PTs[InnerRight] > 600 && PTs[InnerLeft] > 600) {
+		m_green(ON); return 1;
+	}
+	m_green(OFF) return 0;
 }
 
 void setDriveToPuck(void) {
-	//normalizePTs();
-	int i, maxPT1, maxPT2; maxPT1 = 0; maxPT2 = 1; 
-	for (i = 1; i < NUM_PTS; i++) { 
-		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
-		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
-	}
+	 // COMMENT THIS LINE IN FINAL VERSION }
+	// int i, maxPT1, maxPT2; maxPT1 = 0; maxPT2 = 1; 
+	// for (i = 1; i < NUM_PTS; i++) { 
+	// 	if (i !=TopLeft && i != TopRight) {
+	// 		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
+	// 		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
+	// 	}
+	// }
 	if (PTs[Back] == PTs[Left]) { maxPT1 = Left; }
 	if (PTs[Back] == PTs[Right]) { maxPT1 = Right; }
 	// check bounds
-	if (checkInBounds()) {
+	//if (checkInBounds()) {
 		// drive to bot
 		if (PTs[maxPT1]== TopLeft && (PTs[TopLeft] > PTs[TopRight])) {
-			left_slow(); if (time % 10 == 0) {  m_usb_tx_string("left1"); }
+			left(); if (time % 10 == 0) {  m_usb_tx_string("left1"); }
 		} else if (maxPT1 == TopRight && (PTs[TopRight] > PTs[TopLeft])) {
-			right_slow(); if (time % 10 == 0) { m_usb_tx_string("right1");  }
-		} else if (abs(PTs[InnerRight] - PTs[InnerLeft]) < 5 && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {
+			right(); if (time % 10 == 0) { m_usb_tx_string("right1");  }
+		} else if ((PTs[InnerRight] == PTs[InnerLeft]) && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {
 			fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd1"); }
 		} else {
 			switch(maxPT1) {
@@ -93,20 +98,20 @@ void setDriveToPuck(void) {
 				case Left: if (PTs[Left] < closeThreshold) { left(); } else { left_ip(); } if (time % 10 == 0) { m_usb_tx_string("left2"); } break;
 				case TopLeft: left(); if (time % 10 == 0) { m_usb_tx_string("left3"); } break;
 				case TopRight: right();if (time % 10 == 0) { m_usb_tx_string("right3"); } break;
-				case InnerLeft: left(); if (time % 10 == 0) { m_usb_tx_string("left4"); } break;
-				case InnerRight: right(); if (time % 10 == 0) { m_usb_tx_string("right4"); } break;
+				case InnerLeft: right(); if (time % 10 == 0) { m_usb_tx_string("right4"); } break;
+				case InnerRight: left(); if (time % 10 == 0) { m_usb_tx_string("left4"); } break;
 				default: fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd3"); } break;
 			}
 		} checkStuckBot();
-	} else {
-		goToPoint(0, 0);
-	}
+	//} else {
+	//	goToPoint(0, 0); m_usb_tx_string("other");
+	//}
 }
 
 // normalizes PTs by 
 void normalizePTs(void) {
 	int i;
-	for (i = 0; i < NUM_PTS; i++) { // SUBTRACT 1 from NUM_PTS IN REAL VERSION
+	for (i = 0; i < NUM_PTS; i++) {
 		if (PTs[i] - ptNoise < 0) { PTs[i] = 0; }
 		else { PTs[i] = PTs[i] - ptNoise; }
 	}
@@ -116,13 +121,19 @@ void setAmbient(void) {
 	while (!puck_getADCValues());
 	ptNoise = PTs[Back] < PTs[Left]  ?  PTs[Back] : PTs[Left];
 	ptNoise = ptNoise   < PTs[Right] ?  ptNoise	  : PTs[Right];
-	maxPTval = 1023 - ptNoise;
-	noiseThreshold = ptNoise;
 }
 
 ISR(ADC_vect){ //Call Interrupt when conversion completes
 	clear(ADCSRA,ADEN); //Disable ADC subsystem
-	PTs[ADC_Check] = (unsigned int) ADC; //Assign current ADC value to channel in loop
+	//temp = PTs[ADC_Check];
+	//PTs[ADC_Check] = (unsigned int) ADC - ptNoise; //Assign current ADC value to channel in loop
+	//if (PTs[ADC_Check] < 0) { PTs[ADC_Check] = 0; }
+	if (ptNoise != 0) { // not first pass - filter the readings
+		PTs[ADC_Check] = PTs[ADC_Check] * ALPHA + ((unsigned int) ADC) * (1 - ALPHA) - ptNoise;
+		if (PTs[ADC_Check] < 0) { PTs[ADC_Check] = 0; }
+	} else { PTs[ADC_Check] = (unsigned int) ADC - ptNoise; 
+		if (PTs[ADC_Check] < 0) { PTs[ADC_Check] = 0; }
+	}
 	if (ADC_Check == NUM_PTS) {   //If all channels read, reset loop throuch ADC channels
 		ADC_Check = 0; 
 		ADC_Flag = 1; 

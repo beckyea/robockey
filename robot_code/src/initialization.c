@@ -108,8 +108,8 @@ void init_setRobot(void) {
 
 void init_setGoal() {
 	switch(teamColor) {
-		case RED:  offensiveGoalX = 115;  defensiveGoalX = -115; minTraversalX = -115 + goalBoxXLength; break;
-		case BLUE: offensiveGoalX = -115; defensiveGoalX = 115;  maxTraversalX =  115 - goalBoxXLength; break;
+		case BLUE:  offensiveGoalX = 125;  defensiveGoalX = -125; minTraversalX = -115 + goalBoxXLength; break;
+		case RED: offensiveGoalX = -125; defensiveGoalX = 125;  maxTraversalX =  115 - goalBoxXLength; break;
 	}
 
 }

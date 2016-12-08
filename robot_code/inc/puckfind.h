@@ -17,6 +17,7 @@ int seesPuck(void);
 void setDriveToPuck(void);
 void setAmbient(void);
 int hasPuck(void);
+void normalizePTs(void);
 
 
 #endif

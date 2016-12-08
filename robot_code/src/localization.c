@@ -10,7 +10,7 @@
 
 #define XSHIFT 512
 #define YSHIFT 384
-#define ALPHA .8
+#define ALPHA .1
 #define POS_THRESHOLD 20
 double scaleFactor = 0.31;
 
@@ -213,25 +213,24 @@ void findOrientation(int Bx, int By, int Dx, int Dy, int centerx, int centery) {
 }
 
 void lowPassPosition(void) {
-	if (prevPosX == 500 && prevPosY == 500) { 
-		deltat = time - prevTime;
-		posX = prevPosX + velX * deltat ;
-		posY = prevPosY + velY * deltat;
-		theta = prevTheta + omega * deltat;
-	} // Covers case in which no position has been found yet. Contirnue to use previous value
+	// Covers case in which no position has been found yet. Contirnue to use previous value
+	if (prevPosX == 500 || prevPosY == 500) {
+		prevPosX = posX; prevPosY = posY; prevTheta = theta;
+	}
 	else if (abs(posX - prevPosX) < POS_THRESHOLD || abs(posY - prevPosY) < POS_THRESHOLD) {
 		posX = prevPosX * ALPHA + posX * (1 - ALPHA);
 		posY = prevPosY * ALPHA + posY * (1 - ALPHA);
 		theta = prevTheta * ALPHA + theta * (1 - ALPHA);
+		calculateVelocity();
 	} else {
 		posX = prevPosX;
 		posY = prevPosY;
 		theta = prevTheta;
-		calculateVelocity();
 	}
-	// m_usb_tx_uint(5555); m_usb_tx_string(",");
-	// m_usb_tx_int((int) (posX));
+	// // m_usb_tx_uint(5555);
 	// m_usb_tx_string(",");
+	// m_usb_tx_int((int) (posX));
+	// m_usb_tx_string(", y:");
 	// m_usb_tx_int((int) (posY));
 	// m_usb_tx_string(",");
 	// m_usb_tx_int((int) (theta * 100));
@@ -240,15 +239,16 @@ void lowPassPosition(void) {
 
 void calculateVelocity(void) {
 	deltat = time - prevTime;
-	velX = (posX - prevPosX) / deltat;
-	velY = (posY - prevPosY) / deltat;
-	omega = (theta - prevTheta) / deltat;
+	velX = (double) (posX - prevPosX) / deltat;
+	velY = (double) (posY - prevPosY) / deltat;
+	omega = (double) (theta - prevTheta) / deltat;
+	prevPosX = posX; prevPosY = posY; prevTheta = theta;
 }
 
 // returns 1 if in bounds, 0 if not in bounds
 int checkInBounds(void) {
-	if (teamColor == RED) { return posX > minTraversalX; }
-	else { return posX < minTraversalX; }
+	if (teamColor == BLUE) { return posX > minTraversalX; }
+	else { return posX < maxTraversalX; }
 }
 
 /* Gets x as seen in unsigned bits */
@@ -262,6 +262,6 @@ unsigned int loc_getT() { return (unsigned int) (theta * 100); }
 
 /* Determines side of court */
 enum Color loc_getSide() { 
-	if (posX < 0) { return RED; } // Left side
-	else { return BLUE; } // Right side
+	if (posX < 0) { return BLUE; } // Left side
+	else { return RED; } // Right side
 }

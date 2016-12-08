@@ -34,7 +34,7 @@ void printValues(void) {
 int puck_getADCValues(void) {
 	if (ADC_Flag != 0) {  //If ADCs are being read
 		clear(ADCSRA,ADEN); // Disable ADC
-		printValues(); // COMMENT THIS LINE IN FINAL VERSION
+		//printValues(); // COMMENT THIS LINE IN FINAL VERSION
 		ADC_Flag = 0;
 		set(ADCSRA,ADEN); // Re-enable ADC
 		set(ADCSRA,ADSC); // Start next conversion

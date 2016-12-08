@@ -53,12 +53,12 @@ void fwd_fast(void)  { DC_A_desired = 100;  DC_B_desired = 100;  setDrive(); }
 void fwd_slow(void)  { DC_A_desired = 75;   DC_B_desired = 75;   setDrive(); }
 void rev_fast(void)  { DC_A_desired = -100; DC_B_desired = -100; setDrive(); }
 void rev_slow(void)  { DC_A_desired = -75;  DC_B_desired = -75;  setDrive(); }
-void right(void)     { DC_A_desired = 85;   DC_B_desired = 65;   setDrive(); }
-void left(void)      { DC_A_desired = 65;   DC_B_desired = 85;   setDrive(); }
+void right(void)     { DC_A_desired = 90;   DC_B_desired = 65;   setDrive(); }
+void left(void)      { DC_A_desired = 65;   DC_B_desired = 90;   setDrive(); }
 void right_slow(void){ DC_A_desired = 60;   DC_B_desired = 30;   setDrive(); }
 void left_slow(void) { DC_A_desired = 30;   DC_B_desired = 60;   setDrive(); }
-void right_ip(void)  { DC_A_desired = 70;   DC_B_desired = -60;  setDrive(); }
-void left_ip(void)   { DC_A_desired = -60;  DC_B_desired = 70;   setDrive(); }
+void right_ip(void)  { DC_A_desired = 100;   DC_B_desired = -100;  setDrive(); }
+void left_ip(void)   { DC_A_desired = -100;  DC_B_desired = 100;   setDrive(); }
 
 void setDrive(void) {
 	int DC_A_curr, DC_B_curr;
@@ -142,7 +142,7 @@ void celebrate(void) {
 
 
 void checkStuckBot(void) {
-	if (velX == 0 && velY == 0) { rev_fast(); m_wait(50); }
+	//if (velX == 0 && velY == 0) { rev_fast(); }
 }
 
 void setPatrolDirection(void) {
@@ -161,45 +161,45 @@ void patrol(void) {
  	} 
  	checkStuckBot();
  	// instruct patrol path depending on direction of patrol 
-	if (patrolDirection) { goToPoint(minTraversalX, patrolY); }
-	else { goToPoint(maxTraversalX, patrolY); }
+	if (patrolDirection) { goToPoint(minTraversalX, patrolY); } //m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
+	//m_usb_tx_string("\tg2x: "); m_usb_tx_int(minTraversalX); m_usb_tx_string("\tg2y: "); m_usb_tx_int(patrolY); }
+	else { goToPoint(maxTraversalX, patrolY); }//m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
+	//m_usb_tx_string("\tg2x: "); m_usb_tx_int(maxTraversalX); m_usb_tx_string("\tg2y: "); m_usb_tx_int(patrolY);}
+	
 }
 
 void goToGoal(void) {
-	if (hasPuck()) {
-		if (abs(posY) < goalRange - 5) { goToPoint(offensiveGoalX, posY); }
-		goToPoint(offensiveGoalX, 0);
-	} else { gameState = PATROL; }
+	if (abs(posY) < goalRange - 5) { goToPoint(offensiveGoalX, posY); }
+	else { goToPoint(offensiveGoalX, 0); }
 }
 
 // Go to point (x,y)
 int goToPoint(int x, int y) {
-	double thetaToPos, theta_temp;
+	double thetaToPos;
 	thetaToPos = (double) (atan2(posY - y, posX - x)) + 3.1416 / 2;
 	if (thetaToPos > 3.1416) { thetaToPos = thetaToPos - 3.1416 * 2; }
-	theta_temp = theta;
 	if (abs(posX - x) < 10 && abs(posY - y) < 10) {
 		stop();
 		return 1;
-	} else if ((theta_temp - thetaToPos) > .5) {
-		//m_usb_tx_string("r");
+	} else if ((theta - thetaToPos) > .2) {
+		// m_usb_tx_string("R");
 		right();
-	} else if ((thetaToPos - theta_temp) > .5) {
-		//m_usb_tx_string("l");
+	} else if ((thetaToPos - theta) > .2) {
+		// m_usb_tx_string("L");
 		left();
-	} else if (velX == 0 && velY == 0) { 
-		rev_fast();
 	} else { fwd_fast(); }
-	// m_usb_tx_string("\nx:");
-	// m_usb_tx_int((int) (posX));
-	// m_usb_tx_string("\ty:");
-	// m_usb_tx_int((int) (posY));
-	// m_usb_tx_string("\ttheta:");
-	// m_usb_tx_int((int) (theta_temp*1000));
-	// m_usb_tx_string("\ttheta2goal:");
-	// m_usb_tx_int((int) (thetaToPos*1000));
-	// m_usb_tx_string("\tdiff:");
-	// m_usb_tx_int((int) ((theta_temp - thetaToPos)*1000));
+	if (time %10 == 0) {
+		// m_usb_tx_string("\nx:");
+		// m_usb_tx_int((int) (posX));
+		// m_usb_tx_string("\ty:");
+		// m_usb_tx_int((int) (posY));
+		// m_usb_tx_string("\ttheta:");
+		// m_usb_tx_int((int) (theta*1000));
+		// m_usb_tx_string("\ttheta2goal:");
+		// m_usb_tx_int((int) (thetaToPos*1000));
+		// m_usb_tx_string("\tdiff:");
+		// m_usb_tx_int((int) ((theta - thetaToPos)*1000));
+	}
 	return 0;
 }
 

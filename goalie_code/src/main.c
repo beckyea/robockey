@@ -36,6 +36,7 @@ int main() {
 	init_all();
 	drive_init();
 	m_clockdivide(0);
+	gameState = SEES_LEFT;
 	while (true) {
 		switch (gameState) {
 			case(NOT_IN_PLAY): 

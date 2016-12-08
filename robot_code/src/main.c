@@ -14,12 +14,12 @@
 #include "puckfind.h"
 #include "clock.h"
 
-#define LED_FLASH_TIME 50
+#define LED_FLASH_TIME 500
 
 enum Bot currBot = OFF1;    // CHANGE THIS VALUE WHEN FLASHING CODE TO DIFFERENT BOTS
 
 // INITIALIZE VALUES
-enum Color teamColor = RED;	// team color, from defined enum, either RED or BLUE
+enum Color teamColor = NONE;	// team color, from defined enum, either RED or BLUE
 char ROBOT_ADDRESS = 0x18;	// mRF address for robot communication
 int posX = 500;			    // x position of robot, from -115 to 115
 int posY = 500;			    // y position of robot, from -60 to 60
@@ -33,8 +33,9 @@ int maxTraversalX = patrolXRange; // x position of goal you're attacking
 int ourScore = 0;		   // score of your team
 int otherScore = 0;		   // score of the other team
 long time = 0;   		   // total amount of time elapsed (milli-seconds)
-enum State gameState = PATROL;
+enum State gameState;
 char buffer[10];
+char mrF_Interrupt = 0;
 
 void readBuffer();
 
@@ -42,26 +43,36 @@ int main() {
 	init_all();
 	drive_init();
 	m_clockdivide(0);
-	//setAmbient();
+	setAmbient();
 	clock_init();
 	gameState = NOT_IN_PLAY;
 	while (true) {
+		if (mrF_Interrupt) {
+			m_usb_tx_string("in interrupt");
+			m_rf_read(buffer, PACKET_LENGTH);
+			readBuffer();
+			mrF_Interrupt = 0;
+		}
 		loc_readWii();
 		puck_getADCValues();
+		normalizePTs();
 		switch (gameState) {
 			case(NOT_IN_PLAY): 
 				stop(); 
 				break;
 			case (PATROL):
+				m_usb_tx_string("patrol");
 				if (seesPuck()) { gameState = GO_TO_PUCK; }
 				else { patrol(); }
 				break;
 			case (GO_TO_PUCK):
+				m_usb_tx_string("puck");
 				if (!seesPuck()) { setPatrolDirection(); gameState = PATROL; }
 				else if (hasPuck()) { gameState = GO_TO_GOAL; }
 				else { setDriveToPuck(); }
 				break;
 			case (GO_TO_GOAL):
+				m_usb_tx_string("goal");
 				if (!hasPuck() && !seesPuck()) { setPatrolDirection(); gameState = PATROL; }
 				else if (!hasPuck()) { gameState = GO_TO_PUCK; }
 				else { goToGoal(); }
@@ -79,43 +90,46 @@ void readBuffer() {
 		case 0xA0 : // Communication Test
 			loc_readWii();
 			teamColor = loc_getSide();
-			if (teamColor == RED) { set(PORTB, 1); m_wait(LED_FLASH_TIME); clear(PORTB, 2); } 
-			else if (teamColor == BLUE) { set(PORTB, 2); m_wait(LED_FLASH_TIME); clear(PORTB, 1); }
+			if (teamColor == RED) { set(PORTB, 1); clear(PORTB, 2); m_wait(LED_FLASH_TIME); clear(PORTB, 1); } 
+			else if (teamColor == BLUE) { set(PORTB, 2); clear(PORTB, 1); m_wait(LED_FLASH_TIME); clear(PORTB, 2); }
+			teamColor = NONE;
 			break;
 		case 0xA1: // Play
+			drive_init();
 			loc_readWii();
-			teamColor = loc_getSide();
-			if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
-			else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
-			init_setGoal();
+			if (teamColor == NONE) {
+				teamColor = loc_getSide();
+				if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
+				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
+				init_setGoal();
+			}
 			gameState = GO_TO_PUCK;
 			clock_reset();
 			break;
 		case 0xA2: // Goal R
 			if (teamColor == RED) { ourScore = buffer[1]; otherScore = buffer[2]; celebrate(); }
 			else { ourScore = buffer[2]; otherScore = buffer[1]; }
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 		case 0xA3: // Goal B
 			if (teamColor == BLUE) { ourScore = buffer[2]; otherScore = buffer[1]; celebrate(); }
 			else { ourScore = buffer[1]; otherScore = buffer[2]; }
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 		case 0xA4: // Pause
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 		case 0xA5: // Halftime
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 		case 0xA6: // Game Over
 			clear(PORTC, 6); clear(PORTC, 7);
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 	}
 }
 
 // Interrupt to Handle mRF Communication
 ISR(INT2_vect) {
-	m_rf_read(buffer, PACKET_LENGTH);
-	readBuffer();
+	mrF_Interrupt = 1;
 }

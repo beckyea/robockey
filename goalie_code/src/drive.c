@@ -48,7 +48,7 @@ void left(void) {
 }
 void goToCenter(void) {
 	if (posX == 0 && posY == 0) { stop(); }
-	else if (posX < 0 && posY > 0 || posX > 0 && posY < 0) { right(); }
+	else if ((posX < 0 && posY > 0) || (posX > 0 && posY < 0)) { right(); }
 	else { left(); }
 }
 
