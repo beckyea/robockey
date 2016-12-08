@@ -247,8 +247,8 @@ void calculateVelocity(void) {
 
 // returns 1 if in bounds, 0 if not in bounds
 int checkInBounds(void) {
-	if (teamColor == BLUE) { return posX > minTraversalX; }
-	else { return posX < maxTraversalX; }
+	if (offDir == POSITIVE) { return posX < maxTraversalX; }
+	else { return posX > minTraversalX; }
 }
 
 /* Gets x as seen in unsigned bits */

@@ -106,10 +106,13 @@ void init_setRobot(void) {
 	}
 }
 
-void init_setGoal() {
-	switch(teamColor) {
-		case BLUE:  offensiveGoalX = 125;  defensiveGoalX = -125; minTraversalX = -115 + goalBoxXLength; break;
-		case RED: offensiveGoalX = -125; defensiveGoalX = 125;  maxTraversalX =  115 - goalBoxXLength; break;
+// Input 0 if on side matching color, 1 for second half
+void init_setSide(int i) {
+	if ((teamColor == RED && i == 0) || (teamColor == BLUE && i == 1)) {
+		offDir = NEGATIVE;
+		offensiveGoalX = -125; defensiveGoalX = 125;  maxTraversalX = 115 - goalBoxXLength; minTraversalX = -125;
+	} else {
+		offDir = POSITIVE;
+		offensiveGoalX = 125;  defensiveGoalX = -125; minTraversalX = - 115 + goalBoxXLength; maxTraversalX = 125;
 	}
-
 }

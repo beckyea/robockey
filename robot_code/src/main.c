@@ -20,6 +20,7 @@ enum Bot currBot = OFF1;    // CHANGE THIS VALUE WHEN FLASHING CODE TO DIFFERENT
 
 // INITIALIZE VALUES
 enum Color teamColor = NONE;	// team color, from defined enum, either RED or BLUE
+enum Direction offDir = POSITIVE;
 char ROBOT_ADDRESS = 0x18;	// mRF address for robot communication
 int posX = 500;			    // x position of robot, from -115 to 115
 int posY = 500;			    // y position of robot, from -60 to 60
@@ -101,7 +102,7 @@ void readBuffer() {
 				teamColor = loc_getSide();
 				if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
 				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
-				init_setGoal();
+				init_setSide(0);
 			}
 			gameState = GO_TO_PUCK;
 			clock_reset();
@@ -121,6 +122,7 @@ void readBuffer() {
 			break;
 		case 0xA5: // Halftime
 			gameState = NOT_IN_PLAY; stop();
+			init_setSide(1);
 			break;
 		case 0xA6: // Game Over
 			clear(PORTC, 6); clear(PORTC, 7);

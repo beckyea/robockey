@@ -24,7 +24,7 @@ void init_driver(void);
 
 void init_adc(void);
 
-void init_setGoal(void);
+void init_setSide(int i);
 // FUNCTION: Sets the coordinates of both goals as global variables
 
 void init_setRobot(void);

@@ -9,6 +9,7 @@
 #define MOTOR_EN 3
 extern enum Color teamColor;
 extern enum Bot currBot;
+extern enum Direction offDir;
 
 // Field Values - Change these for Tuning to the Field
 #define goalRange 27    	// length of the goal in the y direction from the center in cm
@@ -44,7 +45,8 @@ extern int otherScore;
 extern long time;
 
 // Enumerations
-enum Color { NONE = 0; RED = 1, BLUE = 2 };
+enum Color { NONE = 0, RED = 1, BLUE = 2 };
+enum Direction { POSITIVE, NEGATIVE };
 enum Bot { GOALIE, OFF1, OFF2 };
 enum State { NOT_IN_PLAY, PATROL, GO_TO_PUCK, GO_TO_GOAL, HALF_PATROL, GO_TO_BOX_CORNER };
 
