@@ -11,7 +11,7 @@
 #define CLOSE_THRESHOLD 1500  // CHANGE THIS USING SCALED FACTOR
 
 volatile int ADC_Flag = 0;
-enum PT { Left = 0, FrontLeft = 1, FrontRight = 2, Right = 3 };
+enum PT { Left = 2, FrontLeft = 1, FrontRight = 0, Right = 3 };
 int PTs [4] = { 0, 0, 0, 0 }; //PT ADC values
 int ADC_Check = 0; //incr through pt channels
 
@@ -34,7 +34,7 @@ void printValues(void) {
 int puck_getADCValues(void) {
 	if (ADC_Flag != 0) {  //If ADCs are being read
 		clear(ADCSRA,ADEN); // Disable ADC
-		//printValues(); // COMMENT THIS LINE IN FINAL VERSION
+		printValues(); // COMMENT THIS LINE IN FINAL VERSION
 		ADC_Flag = 0;
 		set(ADCSRA,ADEN); // Re-enable ADC
 		set(ADCSRA,ADSC); // Start next conversion
@@ -48,14 +48,14 @@ void puck_drive(void) {
 	rangeVal = (PTs[Left] + PTs[FrontLeft] + PTs[FrontRight] + PTs[Right]) / 4;
 	if (rangeVal < 0.10) {
 		clear(PORTB, 0);
-		gameState = GO_CENTER;
+		gameState = PATROL;
 	} else if (abs(PTs[FrontRight] - PTs[FrontLeft] < 10)) { 
 		// assume puck is centered in front of the goalie bot
-		stop();
+		stop(); set(PORTB, 0);
 	} else if (PTs[Left] >= MAX_THRESHOLD || PTs[Left] > PTs[Right]) { 
-		gameState = SEES_LEFT; left();
+		gameState = SEES_LEFT; set(PORTB, 0);
 	} else if (PTs[Right] >= MAX_THRESHOLD || PTs[Right] > PTs[Left]) { 
-		gameState = SEES_RIGHT; right();
+		gameState = SEES_RIGHT;set(PORTB, 0);
 	}
 }
 

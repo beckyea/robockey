@@ -36,28 +36,31 @@ int main() {
 	init_all();
 	drive_init();
 	m_clockdivide(0);
-	gameState = SEES_LEFT;
+	gameState = PATROL;
+	loc_readWii();
+	puck_getADCValues();
 	while (true) {
 		switch (gameState) {
 			case(NOT_IN_PLAY): 
 				stop(); 
 				break;
 			case (SEES_LEFT):
+				left();
 				loc_readWii();
 				puck_getADCValues();
 				puck_drive();
-				left();
 				break;
 			case (SEES_RIGHT):
+				right();
 				loc_readWii();
 				puck_getADCValues();
 				puck_drive();
-				right(); 
 				break;
-			case (GO_CENTER):
+			case (PATROL):
+				patrol();
 				loc_readWii();
+				puck_getADCValues();
 				puck_drive();
-				goToCenter(); 
 				break;
 		}
 	}
@@ -70,33 +73,37 @@ void readBuffer() {
 		case 0xA0 : // Communication Test
 			loc_readWii();
 			teamColor = loc_getSide();
-			init_setGoal();
-			if (teamColor == RED) { set(PORTB, 1); m_wait(LED_FLASH_TIME); clear(PORTB, 2); } 
-			else if (teamColor == BLUE) { set(PORTB, 2); m_wait(LED_FLASH_TIME); clear(PORTB, 1); }
+			if (teamColor == RED) { set(PORTB, 1); clear(PORTB, 2); m_wait(LED_FLASH_TIME); clear(PORTB, 1); } 
+			else if (teamColor == BLUE) { set(PORTB, 2); clear(PORTB, 1); m_wait(LED_FLASH_TIME); clear(PORTB, 2); }
+			teamColor = NONE;
 			break;
 		case 0xA1: // Play
+			drive_init();
 			loc_readWii();
-			teamColor = loc_getSide();
-			if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
-			else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
-			init_setGoal();
-			gameState = GO_CENTER;
+			if (teamColor == NONE) {
+				teamColor = loc_getSide();
+				if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
+				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
+			} else {
+				if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
+				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
+			}
+			gameState = PATROL;
 			break;
 		case 0xA2: // Goal R
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
-		case 0xA3: // Goal B
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 		case 0xA4: // Pause
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 		case 0xA5: // Halftime
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 		case 0xA6: // Game Over
 			clear(PORTC, 6); clear(PORTC, 7);
-			gameState = NOT_IN_PLAY;
+			gameState = NOT_IN_PLAY; stop();
 			break;
 	}
 }

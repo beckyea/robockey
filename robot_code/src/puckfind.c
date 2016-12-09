@@ -22,7 +22,7 @@ int maxPTval = 1023; // maximum PT reading after removing ambient
 int temp;
 int maxPT1, maxPT2;
 
-int hasPuckThreshold = 600;
+int hasPuckThreshold = 200;
 int noiseThreshold = 20;
 int closeThreshold = 200;
 
@@ -59,6 +59,7 @@ int seesPuck(void) {
 	for (i = 1; i < NUM_PTS; i++) { 
 			if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
 			else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
+
 	}
 	if (PTs[maxPT1] > noiseThreshold) { set(PORTB, 0); return 1; }
 	else { clear(PORTB, 0); return 0; }
@@ -73,61 +74,77 @@ int hasPuck(void) {
 }
 
 void setDriveToPuck(void) {
-	 // COMMENT THIS LINE IN FINAL VERSION }
-	// int i, maxPT1, maxPT2; maxPT1 = 0; maxPT2 = 1; 
-	// for (i = 1; i < NUM_PTS; i++) { 
-	// 	if (i !=TopLeft && i != TopRight) {
-	// 		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
-	// 		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
-	// 	}
-	// }
-	// check bounds
-	//if (checkInBounds()) {
-		// drive to bot
-		if (PTs[maxPT1]== TopLeft && (PTs[TopLeft] > PTs[TopRight])) {
-			left(); if (time % 10 == 0) {  m_usb_tx_string("left1"); }
-		} else if (maxPT1 == TopRight && (PTs[TopRight] > PTs[TopLeft])) {
-			right(); if (time % 10 == 0) { m_usb_tx_string("right1");  }
-		} else if ((PTs[InnerRight] == PTs[InnerLeft]) && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {
-			fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd1"); }
-		} else {
-			switch(maxPT1) {
-				case Back: 
-					if (PTs[Back] == PTs[Left]) { left_ip(); } 
-					else { right_ip(); } 
-					if (time % 10 == 0) { m_usb_tx_string("back2");} 
-					break;
-				case Right: 
-					if (PTs[Right] < closeThreshold) { right(); } 
-					else { right_ip(); } 
-					if (time % 10 == 0) { m_usb_tx_string("right2"); } 
-					break;
-				case Left: 
-					if (PTs[Left] < closeThreshold) { left(); } 
-					else { left_ip(); } 
-					if (time % 10 == 0) { m_usb_tx_string("left2"); } 
-					break;
-				case TopLeft: left(); 
-					if (time % 10 == 0) { m_usb_tx_string("left3"); } 
-					break;
-				case TopRight: 
-					right();
-					if (time % 10 == 0) { m_usb_tx_string("right3"); } 
-					break;
-				case InnerLeft: 
-					if (PTs[TopRight] > PTs[TopLeft]) { right(); if (time % 10 == 0) { m_usb_tx_string("right4"); } } 
-					else { left(); if (time % 10 == 0) { m_usb_tx_string("left4"); } }
-					break;
-				case InnerRight: 
-					if (PTs[TopLeft] > PTs[TopRight]) { left(); if (time % 10 == 0) { m_usb_tx_string("left5"); } } 
-					else { right(); if (time % 10 == 0) { m_usb_tx_string("right5"); } }
-					break;
-				default: fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd3"); } break;
-			}
-		} checkStuckBot();
-	//} else {
-	//	goToPoint(0, 0); m_usb_tx_string("other");
-	//}
+	if (maxPT1 == Back) { maxPT1 = maxPT2; }
+	if (PTs[maxPT1]== TopLeft && (PTs[TopLeft] > PTs[TopRight])) {
+		left(); if (time % 10 == 0) {  m_usb_tx_string("left1"); }
+	} else if (maxPT1 == TopRight && (PTs[TopRight] > PTs[TopLeft])) {
+		right(); if (time % 10 == 0) { m_usb_tx_string("right1");  }
+	} else if ((PTs[InnerRight] == PTs[InnerLeft]) && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {
+		fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd1"); }
+	} else {
+		switch(maxPT1) {
+			case Back: 
+			// 	if (PTs[Back] == PTs[Left]) { left_ip(); } 
+			// 	else { right_ip(); } 
+			// 	if (time % 10 == 0) { m_usb_tx_string("back2");} 
+			// 	break;
+			case Right: 
+				if (PTs[Right] < closeThreshold) { right(); } 
+				else { right_ip(); } 
+				if (time % 10 == 0) { m_usb_tx_string("right2"); } 
+				break;
+			case Left: 
+				if (PTs[Left] < closeThreshold) { left(); } 
+				else { left_ip(); } 
+				if (time % 10 == 0) { m_usb_tx_string("left2"); } 
+				break;
+			case TopLeft: left(); 
+				if (time % 10 == 0) { m_usb_tx_string("left3"); } 
+				break;
+			case TopRight: 
+				right();
+				if (time % 10 == 0) { m_usb_tx_string("right3"); } 
+				break;
+			case InnerLeft: 
+				if (PTs[TopRight] > PTs[TopLeft]) { right(); if (time % 10 == 0) { m_usb_tx_string("right4"); } } 
+				else { left(); if (time % 10 == 0) { m_usb_tx_string("left4"); } }
+				break;
+			case InnerRight: 
+				if (PTs[TopLeft] > PTs[TopRight]) { left(); if (time % 10 == 0) { m_usb_tx_string("left5"); } } 
+				else { right(); if (time % 10 == 0) { m_usb_tx_string("right5"); } }
+				break;
+			default: fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd3"); } break;
+		}
+	}
+}
+
+void face_puck() {
+	if (PTs[maxPT1]== TopLeft && (PTs[TopLeft] > PTs[TopRight])) { left_ip(); }
+	else if (maxPT1 == TopRight && (PTs[TopRight] > PTs[TopLeft])) { right_ip(); }
+	else if ((PTs[InnerRight] == PTs[InnerLeft]) && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {} 
+	else {
+		switch(maxPT1) {
+			// case Back: 
+			// 	if (PTs[Back] == PTs[Left]) { left_ip(); } else { right_ip(); } 
+			// 	break;
+			case Right: right_ip(); 
+				break;
+			case Left: left_ip(); 
+				break;
+			case TopLeft: left_ip(); 
+				break;
+			case TopRight: right_ip();
+				break;
+			case InnerLeft: 
+				if (PTs[TopRight] > PTs[TopLeft]) { right_ip(); } else { left_ip(); }
+				break;
+			case InnerRight: 
+				if (PTs[TopLeft] > PTs[TopRight]) { left_ip(); } else { right_ip(); }
+				break;
+			default:  break;
+		}
+	}
+
 }
 
 // normalizes PTs by 

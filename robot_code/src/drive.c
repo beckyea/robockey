@@ -2,6 +2,7 @@
 * Methods to control the robot's drivetrain given input values of where to go
 * and how to get there.
 */
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 #include "initialization.h"
 #include "vals.h"
@@ -11,10 +12,12 @@
 #include "puckfind.h"
 #include <stdlib.h>
 
+#define MIN_TURN_PWM 55
 #define MOTOR_PORT PORTB
+#define PWM_SCALE_FACTOR 40
+#define GOAL_DISTANCE 130
 
 #define DRIVE_ALPHA 0.2
-#define motor_left_over_right 1.02
 #define SAME_POS_VAL 10
 #define K_P 1
 #define K_I 0
@@ -26,6 +29,7 @@ double thetaThreshold = 0.2;
 double integral_theta, preverror_theta, integral_omega, preverror_omega;
 int deltat;
 int patrolDirection = 0; // 0 if patroling w/ pos x velocity, 1 if negative x velocity
+double motor_left_over_right;
 
 int DC_A_desired, DC_B_desired;
 int LeftFor, RightFor = 1;
@@ -40,6 +44,8 @@ void setDrive(void);
 // Initializes the motors
 void drive_init(void) { 
 	set(PIND,MOTOR_EN); // Define output pins for Motor Control
+	if (currBot == OFF1) { motor_left_over_right = 1.02; }
+	else {motor_left_over_right = 1.2;}
 }
 
 void setLeftFwd(void)  { if (!check(PIND, 3)) { drive_init(); } set(PORTC, 7);   clear(PORTC, 6); LeftFor = 1;}
@@ -170,8 +176,59 @@ void patrol(void) {
 }
 
 void goToGoal(void) {
-	if (abs(posY) < goalRange - 5) { goToPoint(offensiveGoalX, posY); }
-	else { goToPoint(offensiveGoalX, 0); }
+	double error, thetaToGoal;
+	if (offDir == POSITIVE) {
+		thetaToGoal = 3.1416/2 + (double) (atan2(posY - 0, posX - GOAL_DISTANCE));
+		if (thetaToGoal > 3.1416) { thetaToGoal -= 3.1416 * 2; }
+		if (theta > 0) {
+			if (posX > 0) { left(); }
+			else { right(); }
+		} else {
+			error = theta - thetaToGoal;
+			if (error > 0) {
+				DC_A_desired = 100;
+				DC_B_desired = MAX(MIN_TURN_PWM, 100 - error*PWM_SCALE_FACTOR);
+			} else {
+				DC_A_desired = MAX(MIN_TURN_PWM, 100 + error*PWM_SCALE_FACTOR);
+				DC_B_desired = 100;
+			}
+			setDrive();
+		}
+	}
+	else {
+		thetaToGoal = 3.1416/2 + (double) (atan2(posY - 0, posX + GOAL_DISTANCE));
+		if (thetaToGoal > 3.1416) { thetaToGoal -= 3.1416 * 2; }
+		if (theta < 0) {
+			if (posX > 0) { right(); }
+			else { left(); }
+		} else {
+			error = theta - thetaToGoal;
+			if (error > 0) {
+				DC_A_desired = 100;
+				DC_B_desired = MAX(MIN_TURN_PWM, 100 - error*PWM_SCALE_FACTOR);
+			} else {
+				DC_A_desired = MAX(MIN_TURN_PWM, 100 + error*PWM_SCALE_FACTOR);
+				DC_B_desired = 100;
+			}
+			setDrive();
+		}
+	}
+		if (time %10 == 0) {
+		m_usb_tx_string("\nx:");
+		m_usb_tx_int((int) (posX));
+		m_usb_tx_string("\ty:");
+		m_usb_tx_int((int) (posY));
+		m_usb_tx_string("\ttheta:");
+		m_usb_tx_int((int) (theta*1000));
+		m_usb_tx_string("\ttheta2goal:");
+		m_usb_tx_int((int) (thetaToGoal*1000));
+		m_usb_tx_string("\tdiff:");
+		m_usb_tx_int((int) ((theta - thetaToGoal)*1000));
+		m_usb_tx_string("\tDCA:");
+		m_usb_tx_int((int) (DC_A_desired));
+		m_usb_tx_string("\tDCB:");
+		m_usb_tx_int((int) (DC_B_desired));
+	}
 }
 
 

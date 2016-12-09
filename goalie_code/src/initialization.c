@@ -78,12 +78,5 @@ void init_driver(void) {
 	OCR4C = 255;
 	OCR4A = 255;
 	OCR4B = 255;
-}
-
-void init_setGoal() {
-	switch(teamColor) {
-		case RED:  defensiveGoalX = -115; break;
-		case BLUE: defensiveGoalX = 115;  break;
-	}
 
 }

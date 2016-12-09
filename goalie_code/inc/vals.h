@@ -30,8 +30,8 @@ extern double rangeVal;
 extern double puckAngle;
 
 // Enumerations
-enum Color { RED = 1, BLUE = 2 };
+enum Color { NONE, RED = 1, BLUE = 2 };
 enum Bot { GOALIE, OFF1, OFF2 };
-enum State { NOT_IN_PLAY, SEES_LEFT, SEES_RIGHT, GO_CENTER };
+enum State { NOT_IN_PLAY, SEES_LEFT, SEES_RIGHT, PATROL };
 
 #endif

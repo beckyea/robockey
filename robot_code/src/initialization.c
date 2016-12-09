@@ -79,7 +79,7 @@ void init_driver(void) {
 	set(PORTB,5); //B5 --> D9 (INB2)
 
 	set(DDRD,MOTOR_EN);
-
+	
 	// Initialize Timer 4
 	set(TCCR4B,CS43); clear(TCCR4B,CS42); clear(TCCR4B,CS41); clear(TCCR4B,CS40);// set timer prescaler to /64
 	clear(TCCR4D,WGM41); clear(TCCR4D,WGM40); // Count UP to OCR4C

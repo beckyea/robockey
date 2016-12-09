@@ -19,5 +19,6 @@ void setAmbient(void);
 int hasPuck(void);
 void normalizePTs(void);
 
+void face_puck(void);
 
 #endif

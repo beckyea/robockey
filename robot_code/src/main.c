@@ -16,12 +16,12 @@
 
 #define LED_FLASH_TIME 500
 
-enum Bot currBot = OFF1;    // CHANGE THIS VALUE WHEN FLASHING CODE TO DIFFERENT BOTS
+enum Bot currBot = OFF2;    // CHANGE THIS VALUE WHEN FLASHING CODE TO DIFFERENT BOTS
 
 // INITIALIZE VALUES
 enum Color teamColor = NONE;	// team color, from defined enum, either RED or BLUE
 enum Direction offDir = POSITIVE;
-char ROBOT_ADDRESS = 0x18;	// mRF address for robot communication
+char ROBOT_ADDRESS = 0x19;	// mRF address for robot communication
 int posX = 500;			    // x position of robot, from -115 to 115
 int posY = 500;			    // y position of robot, from -60 to 60
 double theta = 0;		    // angle of robot from global frame
@@ -46,7 +46,7 @@ int main() {
 	m_clockdivide(0);
 	setAmbient();
 	clock_init();
-	gameState = GO_TO_PUCK;
+	gameState = NOT_IN_PLAY;
 	while (true) {
 		if (mrF_Interrupt) {
 			m_rf_read(buffer, PACKET_LENGTH);
@@ -56,33 +56,42 @@ int main() {
 		loc_readWii();
 		puck_getADCValues();
 		normalizePTs();
-		switch (gameState) {
-			case(NOT_IN_PLAY): 
-				stop(); 
-				break;
-			case (MATCH_START):
-				fwd_fast(); m_wait(50); gameState = PATROL;
-				break;
-			case (PATROL):
-				m_usb_tx_string("patrol");
-				if (seesPuck()) { gameState = GO_TO_PUCK; }
-				else { patrol(); }
-				break;
-			case (GO_TO_PUCK):
-				//m_usb_tx_string("puck");
-				if (!seesPuck()) { setPatrolDirection(); gameState = PATROL; }
-				else if (hasPuck()) { gameState = GO_TO_GOAL; }
-				else { setDriveToPuck(); }
-				break;
-			case (GO_TO_GOAL):
-				m_usb_tx_string("goal");
-				if (!hasPuck() && !seesPuck()) { setPatrolDirection(); gameState = PATROL; }
-				else if (!hasPuck()) { gameState = GO_TO_PUCK; }
-				else { goToGoal(); }
-				break;
-			default:
-				break;
-		}
+		setDriveToPuck();
+		// switch (gameState) {
+		// 	case(NOT_IN_PLAY): 
+		// 		stop(); 
+		// 		break;
+		// 	case (MATCH_START):
+		// 		fwd_fast(); m_wait(50); gameState = PATROL;
+		// 		break;
+		// 	case (PATROL):
+		// 		m_usb_tx_string("patrol");
+		// 		if (seesPuck()) { gameState = GO_TO_PUCK; }
+		// 		else { patrol(); }
+		// 		break;
+		// 	case (GO_TO_PUCK):
+		// 		//m_usb_tx_string("puck");
+		// 		if (!checkInBounds()) { gameState = NO_GO_ZONE; }
+		// 		else if (!seesPuck()) { setPatrolDirection(); gameState = PATROL; }
+		// 		else if (hasPuck()) { gameState = GO_TO_GOAL; }
+		// 		else { setDriveToPuck(); }
+		// 		break;
+		// 	case (GO_TO_GOAL):
+		// 		m_usb_tx_string("goal");
+		// 		if (!checkInBounds()) { gameState = NO_GO_ZONE; }
+		// 		else if (!hasPuck() && !seesPuck()) { setPatrolDirection(); gameState = PATROL; }
+		// 		else if (!hasPuck()) { gameState = GO_TO_PUCK; }
+		// 		else { goToGoal(); }
+		// 		break;
+		// 	case (NO_GO_ZONE):
+		// 		if (hasPuck()) { stop(); }
+		// 		else if (seesPuck()) { 
+		// 			face_puck(); 
+		// 			if ((offDir == POSITIVE && theta < 0) || (offDir == NEGATIVE && theta > 0)) { gameState = PATROL; }
+		// 		}
+		// 	default:
+		// 		break;
+		// }
 	}
 	return 0;
 }
@@ -105,8 +114,11 @@ void readBuffer() {
 				if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
 				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
 				init_setSide(0);
+			} else {
+				if (teamColor == RED) { set(PORTB, 1);  clear(PORTB, 2); } // Left Side
+				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
 			}
-			gameState = GO_TO_PUCK;
+			gameState = MATCH_START;
 			clock_reset();
 			break;
 		case 0xA2: // Goal R

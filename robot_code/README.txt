@@ -7,8 +7,8 @@ B5 : OCR4B'
 B6 : OCR4B
 C6 : OCR4A'
 C7 : OCR4A
-E6 :
-AR : 
+E6 : unused - red onboard LED
+AR : unused
 F0 : 
 F1 : ADC, Phototransistor
 F4 : ADC, Phototransistor
@@ -22,9 +22,9 @@ B1 : Red LED
 B2 : Blue LED
 B3 : 
 B7 : 
-D0 : 
-D1 : 
-D2 :
+D0 : off limits - mWii & mRF
+D1 : off limits - mWii & mRF
+D2 : off limits - mRF
 D3 : Motor Driver, ENABLE (A0)
 D4 : ADC, Phototransistor
 D5 : 

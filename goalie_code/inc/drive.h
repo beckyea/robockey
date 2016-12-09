@@ -10,3 +10,4 @@ void drive_init(void);
 void stop(void);
 void right(void);
 void left(void);
+void patrol(void);

@@ -48,6 +48,6 @@ extern long time;
 enum Color { NONE = 0, RED = 1, BLUE = 2 };
 enum Direction { POSITIVE, NEGATIVE };
 enum Bot { GOALIE, OFF1, OFF2 };
-enum State { NOT_IN_PLAY, PATROL, GO_TO_PUCK, GO_TO_GOAL, HALF_PATROL, GO_TO_BOX_CORNER, MATCH_START };
+enum State { NOT_IN_PLAY, PATROL, GO_TO_PUCK, GO_TO_GOAL, HALF_PATROL, GO_TO_BOX_CORNER, MATCH_START, NO_GO_ZONE };
 
 #endif
