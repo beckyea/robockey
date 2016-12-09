@@ -40,6 +40,7 @@ int main() {
 	loc_readWii();
 	puck_getADCValues();
 	while (true) {
+		patrol();
 		switch (gameState) {
 			case(NOT_IN_PLAY): 
 				stop(); 
@@ -89,6 +90,7 @@ void readBuffer() {
 				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
 			}
 			gameState = PATROL;
+			set(DDRB,4); set(PORTB,4);
 			break;
 		case 0xA2: // Goal R
 			gameState = NOT_IN_PLAY; stop();

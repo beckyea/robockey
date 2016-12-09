@@ -64,7 +64,7 @@ void setDrive(void) {
 }
 
 void goToCenter(void) {
-	if (posX == 0 && posY == 0) { stop(); }
+	if (posY == 0) { stop(); }
 	else if ((posX < 0 && posY > 0) || (posX > 0 && posY < 0)) { right(); }
 	else { left(); }
 }

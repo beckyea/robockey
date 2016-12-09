@@ -57,9 +57,8 @@ int puck_getADCValues(void) {
 int seesPuck(void) {
 	int i; maxPT1 = 0; maxPT2 = 1; 
 	for (i = 1; i < NUM_PTS; i++) { 
-			if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
-			else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
-
+		if (PTs[i] > PTs[maxPT1]) { maxPT2 = maxPT1; maxPT1 = i; }
+		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
 	}
 	if (PTs[maxPT1] > noiseThreshold) { set(PORTB, 0); return 1; }
 	else { clear(PORTB, 0); return 0; }
@@ -74,7 +73,6 @@ int hasPuck(void) {
 }
 
 void setDriveToPuck(void) {
-	if (maxPT1 == Back) { maxPT1 = maxPT2; }
 	if (PTs[maxPT1]== TopLeft && (PTs[TopLeft] > PTs[TopRight])) {
 		left(); if (time % 10 == 0) {  m_usb_tx_string("left1"); }
 	} else if (maxPT1 == TopRight && (PTs[TopRight] > PTs[TopLeft])) {
@@ -84,10 +82,10 @@ void setDriveToPuck(void) {
 	} else {
 		switch(maxPT1) {
 			case Back: 
-			// 	if (PTs[Back] == PTs[Left]) { left_ip(); } 
-			// 	else { right_ip(); } 
-			// 	if (time % 10 == 0) { m_usb_tx_string("back2");} 
-			// 	break;
+				if (PTs[Back] == PTs[Left]) { left_ip(); } 
+				else { right_ip(); } 
+				if (time % 10 == 0) { m_usb_tx_string("back2");} 
+				break;
 			case Right: 
 				if (PTs[Right] < closeThreshold) { right(); } 
 				else { right_ip(); } 
@@ -124,9 +122,9 @@ void face_puck() {
 	else if ((PTs[InnerRight] == PTs[InnerLeft]) && (maxPT1 == InnerLeft || maxPT1 == InnerRight || maxPT2 == InnerLeft || maxPT2 == InnerRight)) {} 
 	else {
 		switch(maxPT1) {
-			// case Back: 
-			// 	if (PTs[Back] == PTs[Left]) { left_ip(); } else { right_ip(); } 
-			// 	break;
+			case Back: 
+				if (PTs[Back] == PTs[Left]) { left_ip(); } else { right_ip(); } 
+				break;
 			case Right: right_ip(); 
 				break;
 			case Left: left_ip(); 

@@ -45,7 +45,7 @@ void setDrive(void);
 void drive_init(void) { 
 	set(PIND,MOTOR_EN); // Define output pins for Motor Control
 	if (currBot == OFF1) { motor_left_over_right = 1.02; }
-	else {motor_left_over_right = 1.2;}
+	else {motor_left_over_right = 1.1;}
 }
 
 void setLeftFwd(void)  { if (!check(PIND, 3)) { drive_init(); } set(PORTC, 7);   clear(PORTC, 6); LeftFor = 1;}
