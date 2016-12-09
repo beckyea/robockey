@@ -78,6 +78,7 @@ void init_driver(void) {
 	set(PORTC,7); //C7 --> D8 (INB1)
 	set(PORTB,5); //B5 --> D9 (INB2)
 
+	set(DDRD,MOTOR_EN);
 
 	// Initialize Timer 4
 	set(TCCR4B,CS43); clear(TCCR4B,CS42); clear(TCCR4B,CS41); clear(TCCR4B,CS40);// set timer prescaler to /64

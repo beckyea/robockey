@@ -12,7 +12,8 @@
 #define ALPHA 0.4
 
 volatile int ADC_Flag = 0;
-enum PT { TopRight = 5, Right = 6, Back = 1, Left = 7, TopLeft = 4, InnerLeft = 2, InnerRight = 3, Down = 0 };
+// F0 F4 F5 F6 F7 D4 D6 D7
+enum PT { TopRight = 3, Right = 2, Back = 0, Left = 1, TopLeft = 4, InnerLeft = 5, InnerRight = 6, Down = 7 };
 int PTs [8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; //PT ADC values
 int ADC_Check = 0; //incr through pt channels
 
@@ -80,8 +81,6 @@ void setDriveToPuck(void) {
 	// 		else if (PTs[i] > PTs[maxPT2]) { maxPT2 = i; }
 	// 	}
 	// }
-	if (PTs[Back] == PTs[Left]) { maxPT1 = Left; }
-	if (PTs[Back] == PTs[Right]) { maxPT1 = Right; }
 	// check bounds
 	//if (checkInBounds()) {
 		// drive to bot
@@ -93,13 +92,36 @@ void setDriveToPuck(void) {
 			fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd1"); }
 		} else {
 			switch(maxPT1) {
-				case Back: right_ip(); if (time % 10 == 0) { m_usb_tx_string("back2");} break;
-				case Right: if (PTs[Right] < closeThreshold) { right(); } else { right_ip(); } if (time % 10 == 0) { m_usb_tx_string("right2"); } break;
-				case Left: if (PTs[Left] < closeThreshold) { left(); } else { left_ip(); } if (time % 10 == 0) { m_usb_tx_string("left2"); } break;
-				case TopLeft: left(); if (time % 10 == 0) { m_usb_tx_string("left3"); } break;
-				case TopRight: right();if (time % 10 == 0) { m_usb_tx_string("right3"); } break;
-				case InnerLeft: right(); if (time % 10 == 0) { m_usb_tx_string("right4"); } break;
-				case InnerRight: left(); if (time % 10 == 0) { m_usb_tx_string("left4"); } break;
+				case Back: 
+					if (PTs[Back] == PTs[Left]) { left_ip(); } 
+					else { right_ip(); } 
+					if (time % 10 == 0) { m_usb_tx_string("back2");} 
+					break;
+				case Right: 
+					if (PTs[Right] < closeThreshold) { right(); } 
+					else { right_ip(); } 
+					if (time % 10 == 0) { m_usb_tx_string("right2"); } 
+					break;
+				case Left: 
+					if (PTs[Left] < closeThreshold) { left(); } 
+					else { left_ip(); } 
+					if (time % 10 == 0) { m_usb_tx_string("left2"); } 
+					break;
+				case TopLeft: left(); 
+					if (time % 10 == 0) { m_usb_tx_string("left3"); } 
+					break;
+				case TopRight: 
+					right();
+					if (time % 10 == 0) { m_usb_tx_string("right3"); } 
+					break;
+				case InnerLeft: 
+					if (PTs[TopRight] > PTs[TopLeft]) { right(); if (time % 10 == 0) { m_usb_tx_string("right4"); } } 
+					else { left(); if (time % 10 == 0) { m_usb_tx_string("left4"); } }
+					break;
+				case InnerRight: 
+					if (PTs[TopLeft] > PTs[TopRight]) { left(); if (time % 10 == 0) { m_usb_tx_string("left5"); } } 
+					else { right(); if (time % 10 == 0) { m_usb_tx_string("right5"); } }
+					break;
 				default: fwd_fast(); if (time % 10 == 0) { m_usb_tx_string("fwd3"); } break;
 			}
 		} checkStuckBot();
@@ -147,47 +169,47 @@ ISR(ADC_vect){ //Call Interrupt when conversion completes
 		clear(ADMUX,MUX1);
 		clear(ADMUX,MUX0);
 		break;
-		case 1: // Set ADC to D7
-		set(ADCSRB,MUX5);
-		clear(ADMUX,MUX2);
-		set(ADMUX,MUX1);
-		clear(ADMUX,MUX0);
-		break;
-		case 2: // Set ADC to F4
+		case 1: // Set ADC to F4
 		clear(ADCSRB,MUX5);
 		set(ADMUX,MUX2);
 		clear(ADMUX,MUX1);
 		clear(ADMUX,MUX0);
 		break;
-		case 3: // Set ADC to F5
+		case 2: // Set ADC to F5
 		clear(ADCSRB,MUX5);
 		set(ADMUX,MUX2);
 		clear(ADMUX,MUX1);
 		set(ADMUX,MUX0);
 		break;
-		case 4: // Set ADC to F6
+		case 3: // Set ADC to F6
 		clear(ADCSRB,MUX5);
 		set(ADMUX,MUX2);
 		set(ADMUX,MUX1);
 		clear(ADMUX,MUX0);
 		break;
-		case 5: // Set ADC to F7
+		case 4: // Set ADC to F7
 		clear(ADCSRB,MUX5);
 		set(ADMUX,MUX2);
 		set(ADMUX,MUX1);
 		set(ADMUX,MUX0);
 		break;
-		case 6: // Set ADC to D4
+		case 5: // Set ADC to D4
 		set(ADCSRB,MUX5);
 		clear(ADMUX,MUX2);
 		clear(ADMUX,MUX1);
 		clear(ADMUX,MUX0);
 		break;
-		case 7: // Set ADC to D6
+		case 6: // Set ADC to D6
 		set(ADCSRB,MUX5);
 		clear(ADMUX,MUX2);
 		set(ADMUX,MUX1);
 		set(ADMUX,MUX0);
+		break;
+		case 7: // Set ADC to D7
+		set(ADCSRB,MUX5);
+		clear(ADMUX,MUX2);
+		set(ADMUX,MUX1);
+		clear(ADMUX,MUX0);
 		break;
 		default:
 		break;

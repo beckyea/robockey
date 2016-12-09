@@ -13,7 +13,7 @@ extern enum Direction offDir;
 
 // Field Values - Change these for Tuning to the Field
 #define goalRange 27    	// length of the goal in the y direction from the center in cm
-#define patrolXRange 87 	// magnitude of x value from center for patrol
+#define patrolXRange 80 	// magnitude of x value from center for patrol
 #define patrolYVal 20		// magnitude of y value from central axis for patrol
 #define goalBoxXLength 30	// minimum distance for bot to travel from own goal
 extern int offensiveGoalX;
@@ -48,6 +48,6 @@ extern long time;
 enum Color { NONE = 0, RED = 1, BLUE = 2 };
 enum Direction { POSITIVE, NEGATIVE };
 enum Bot { GOALIE, OFF1, OFF2 };
-enum State { NOT_IN_PLAY, PATROL, GO_TO_PUCK, GO_TO_GOAL, HALF_PATROL, GO_TO_BOX_CORNER };
+enum State { NOT_IN_PLAY, PATROL, GO_TO_PUCK, GO_TO_GOAL, HALF_PATROL, GO_TO_BOX_CORNER, MATCH_START };
 
 #endif

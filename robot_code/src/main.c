@@ -46,10 +46,9 @@ int main() {
 	m_clockdivide(0);
 	setAmbient();
 	clock_init();
-	gameState = NOT_IN_PLAY;
+	gameState = GO_TO_PUCK;
 	while (true) {
 		if (mrF_Interrupt) {
-			m_usb_tx_string("in interrupt");
 			m_rf_read(buffer, PACKET_LENGTH);
 			readBuffer();
 			mrF_Interrupt = 0;
@@ -61,13 +60,16 @@ int main() {
 			case(NOT_IN_PLAY): 
 				stop(); 
 				break;
+			case (MATCH_START):
+				fwd_fast(); m_wait(50); gameState = PATROL;
+				break;
 			case (PATROL):
 				m_usb_tx_string("patrol");
 				if (seesPuck()) { gameState = GO_TO_PUCK; }
 				else { patrol(); }
 				break;
 			case (GO_TO_PUCK):
-				m_usb_tx_string("puck");
+				//m_usb_tx_string("puck");
 				if (!seesPuck()) { setPatrolDirection(); gameState = PATROL; }
 				else if (hasPuck()) { gameState = GO_TO_GOAL; }
 				else { setDriveToPuck(); }

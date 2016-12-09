@@ -227,14 +227,14 @@ void lowPassPosition(void) {
 		posY = prevPosY;
 		theta = prevTheta;
 	}
-	// // m_usb_tx_uint(5555);
-	// m_usb_tx_string(",");
-	// m_usb_tx_int((int) (posX));
-	// m_usb_tx_string(", y:");
-	// m_usb_tx_int((int) (posY));
-	// m_usb_tx_string(",");
-	// m_usb_tx_int((int) (theta * 100));
-	// m_usb_tx_string("\n"); m_usb_tx_push();
+	// m_usb_tx_uint(5555);
+	m_usb_tx_string(",");
+	m_usb_tx_int((int) (posX));
+	m_usb_tx_string(", y:");
+	m_usb_tx_int((int) (posY));
+	m_usb_tx_string(",");
+	m_usb_tx_int((int) (theta * 100));
+	m_usb_tx_string("\n"); m_usb_tx_push();
 }
 
 void calculateVelocity(void) {

@@ -14,7 +14,7 @@
 #define MOTOR_PORT PORTB
 
 #define DRIVE_ALPHA 0.2
-#define LEFT_OVER_RIGHT 2
+#define motor_left_over_right 1.02
 #define SAME_POS_VAL 10
 #define K_P 1
 #define K_I 0
@@ -39,28 +39,30 @@ void setDrive(void);
 
 // Initializes the motors
 void drive_init(void) { 
-	set(DDRB,MOTOR_EN); // Define output pins for Motor Control
+	set(PIND,MOTOR_EN); // Define output pins for Motor Control
 }
 
-void setLeftFwd(void)  { if (!check(PINB, 3)) { drive_init(); } set(PORTC, 7);   clear(PORTC, 6); LeftFor = 1;}
-void setLeftRev(void)  { if (!check(PINB, 3)) { drive_init(); } clear(PORTC, 7); set(PORTC, 6);   LeftFor = 0;}
-void setRightFwd(void) { if (!check(PINB, 3)) { drive_init(); } set(PORTB, 6);   clear(PORTB, 5); RightFor = 1;}
-void setRightRev(void) { if (!check(PINB, 3)) { drive_init(); } clear(PORTB, 6); set(PORTB, 5);   RightFor = 0;}
-void stop(void)        { clear(DDRB, MOTOR_EN); }
+void setLeftFwd(void)  { if (!check(PIND, 3)) { drive_init(); } set(PORTC, 7);   clear(PORTC, 6); LeftFor = 1;}
+void setLeftRev(void)  { if (!check(PIND, 3)) { drive_init(); } clear(PORTC, 7); set(PORTC, 6);   LeftFor = 0;}
+void setRightFwd(void) { if (!check(PIND, 3)) { drive_init(); } set(PORTB, 6);   clear(PORTB, 5); RightFor = 1;}
+void setRightRev(void) { if (!check(PIND, 3)) { drive_init(); } clear(PORTB, 6); set(PORTB, 5);   RightFor = 0;}
+void stop(void)        { clear(PORTD, MOTOR_EN); }
 
 // Set Desired Duty Cycle
 void fwd_fast(void)  { DC_A_desired = 100;  DC_B_desired = 100;  setDrive(); }
 void fwd_slow(void)  { DC_A_desired = 75;   DC_B_desired = 75;   setDrive(); }
 void rev_fast(void)  { DC_A_desired = -100; DC_B_desired = -100; setDrive(); }
 void rev_slow(void)  { DC_A_desired = -75;  DC_B_desired = -75;  setDrive(); }
-void right(void)     { DC_A_desired = 90;   DC_B_desired = 65;   setDrive(); }
-void left(void)      { DC_A_desired = 65;   DC_B_desired = 90;   setDrive(); }
+void right(void)     { DC_A_desired = 90;   DC_B_desired = 50;   setDrive(); }
+void left(void)      { DC_A_desired = 50;   DC_B_desired = 90;   setDrive(); }
 void right_slow(void){ DC_A_desired = 60;   DC_B_desired = 30;   setDrive(); }
 void left_slow(void) { DC_A_desired = 30;   DC_B_desired = 60;   setDrive(); }
 void right_ip(void)  { DC_A_desired = 100;   DC_B_desired = -100;  setDrive(); }
 void left_ip(void)   { DC_A_desired = -100;  DC_B_desired = 100;   setDrive(); }
 
 void setDrive(void) {
+	if (DC_A_desired * motor_left_over_right < 100) { DC_A_desired = DC_A_desired * motor_left_over_right; }
+	else { DC_B_desired = DC_B_desired / motor_left_over_right; }
 	int DC_A_curr, DC_B_curr;
 	// determine current duty cycle
 	if (LeftFor) { DC_A_curr = OCR4A*100.0/255; }
@@ -154,16 +156,15 @@ void patrol(void) {
 	if (currBot == OFF1) { patrolY = patrolYVal; }
 	else { patrolY = -patrolYVal; }
 	// check if reached the turn-around points
-	if ((abs(posX - maxTraversalX) <= SAME_POS_VAL) && (abs(posY - patrolY) <= SAME_POS_VAL)) {
+	if ((abs(posX - patrolXRange) <= SAME_POS_VAL) && (abs(posY - patrolY) <= SAME_POS_VAL)) {
 		patrolDirection = 1; // set patrol in negative x velocity
- 	} else if ((abs(posX - minTraversalX) <= SAME_POS_VAL) && (abs(posY - patrolY) <= SAME_POS_VAL)) {
+ 	} else if ((abs(posX + patrolXRange) <= SAME_POS_VAL) && (abs(posY - patrolY) <= SAME_POS_VAL)) {
  		patrolDirection = 0; // set patrol in positive x velocity
  	} 
- 	checkStuckBot();
  	// instruct patrol path depending on direction of patrol 
-	if (patrolDirection) { goToPoint(minTraversalX, patrolY); } //m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
+	if (patrolDirection) { goToPoint(-patrolXRange, patrolY); } //m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
 	//m_usb_tx_string("\tg2x: "); m_usb_tx_int(minTraversalX); m_usb_tx_string("\tg2y: "); m_usb_tx_int(patrolY); }
-	else { goToPoint(maxTraversalX, patrolY); }//m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
+	else { goToPoint(patrolXRange, patrolY); }//m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
 	//m_usb_tx_string("\tg2x: "); m_usb_tx_int(maxTraversalX); m_usb_tx_string("\tg2y: "); m_usb_tx_int(patrolY);}
 	
 }
@@ -172,6 +173,7 @@ void goToGoal(void) {
 	if (abs(posY) < goalRange - 5) { goToPoint(offensiveGoalX, posY); }
 	else { goToPoint(offensiveGoalX, 0); }
 }
+
 
 // Go to point (x,y)
 int goToPoint(int x, int y) {
