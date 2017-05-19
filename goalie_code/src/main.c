@@ -36,7 +36,7 @@ int main() {
 	init_all();
 	drive_init();
 	m_clockdivide(0);
-	gameState = PATROL;
+	gameState = NOT_IN_PLAY;
 	loc_readWii();
 	puck_getADCValues();
 	while (true) {
@@ -90,7 +90,7 @@ void readBuffer() {
 				else { set(PORTB, 2); clear(PORTB, 1); } // Right Side
 			}
 			gameState = PATROL;
-			set(DDRB,4); set(PORTB,4);
+			set(DDRD,6); set(PORTD,6);
 			break;
 		case 0xA2: // Goal R
 			gameState = NOT_IN_PLAY; stop();
@@ -99,12 +99,14 @@ void readBuffer() {
 			break;
 		case 0xA4: // Pause
 			gameState = NOT_IN_PLAY; stop();
+			clear(PORTD, 6);
 			break;
 		case 0xA5: // Halftime
 			gameState = NOT_IN_PLAY; stop();
+			clear(PORTD,6);
 			break;
 		case 0xA6: // Game Over
-			clear(PORTC, 6); clear(PORTC, 7);
+			clear(PORTC, 6); clear(PORTC, 7); clear(PORTD,6);
 			gameState = NOT_IN_PLAY; stop();
 			break;
 	}

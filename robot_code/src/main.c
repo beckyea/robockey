@@ -64,19 +64,16 @@ int main() {
 				fwd_fast(); m_wait(50); gameState = PATROL;
 				break;
 			case (PATROL):
-				m_usb_tx_string("patrol");
 				if (seesPuck()) { gameState = GO_TO_PUCK; }
 				else { patrol(); }
 				break;
 			case (GO_TO_PUCK):
-				//m_usb_tx_string("puck");
 				if (!checkInBounds()) { gameState = NO_GO_ZONE; }
 				else if (!seesPuck()) { setPatrolDirection(); gameState = PATROL; }
 				else if (hasPuck()) { gameState = GO_TO_GOAL; }
 				else { setDriveToPuck(); }
 				break;
 			case (GO_TO_GOAL):
-				m_usb_tx_string("goal");
 				if (!checkInBounds()) { gameState = NO_GO_ZONE; }
 				else if (!hasPuck() && !seesPuck()) { setPatrolDirection(); gameState = PATROL; }
 				else if (!hasPuck()) { gameState = GO_TO_PUCK; }

@@ -162,9 +162,6 @@ void setAmbient(void) {
 
 ISR(ADC_vect){ //Call Interrupt when conversion completes
 	clear(ADCSRA,ADEN); //Disable ADC subsystem
-	//temp = PTs[ADC_Check];
-	//PTs[ADC_Check] = (unsigned int) ADC - ptNoise; //Assign current ADC value to channel in loop
-	//if (PTs[ADC_Check] < 0) { PTs[ADC_Check] = 0; }
 	if (ptNoise != 0) { // not first pass - filter the readings
 		PTs[ADC_Check] = PTs[ADC_Check] * ALPHA + ((unsigned int) ADC) * (1 - ALPHA) - ptNoise;
 		if (PTs[ADC_Check] < 0) { PTs[ADC_Check] = 0; }

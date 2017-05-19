@@ -17,28 +17,28 @@
 #define PWM_SCALE_FACTOR 40
 #define GOAL_DISTANCE 130
 
-#define DRIVE_ALPHA 0.2
+#define DRIVE_ALPHA 0.2    // for low pass filter
 #define SAME_POS_VAL 10
-#define K_P 1
+#define K_P 1              // PID controls
 #define K_I 0
 #define K_D 0
 
 double thetaPID(double desiredTheta);
 double omegaPID(double desiredTheta);
-double thetaThreshold = 0.2;
+double thetaThreshold = 0.2;   // ok within thetaThreshold radians of desired theta
 double integral_theta, preverror_theta, integral_omega, preverror_omega;
-int deltat;
-int patrolDirection = 0; // 0 if patroling w/ pos x velocity, 1 if negative x velocity
-double motor_left_over_right;
+int deltat;                    // time step
+int patrolDirection = 0;       // 0 if patroling w/ pos x velocity, 1 if negative x velocity
+double motor_left_over_right;  // accounts for differences in motor strength
 
 int DC_A_desired, DC_B_desired;
 int LeftFor, RightFor = 1;
 
-void setLeftFwd(void);
-void setLeftRev(void);
-void setRightFwd(void);
-void setRightRev(void);
-void setDrive(void);
+void setLeftFwd(void);  // sets pins for left wheel going forward
+void setLeftRev(void);  // sets pins for left wheel going backward
+void setRightFwd(void); // sets pins for right wheel going forward
+void setRightRev(void); // sets pins for right wheel going backward
+void setDrive(void);    // sets PWM values for desired drive
 
 
 // Initializes the motors
@@ -55,14 +55,14 @@ void setRightRev(void) { if (!check(PIND, 3)) { drive_init(); } clear(PORTB, 6);
 void stop(void)        { clear(PORTD, MOTOR_EN); }
 
 // Set Desired Duty Cycle
-void fwd_fast(void)  { DC_A_desired = 100;  DC_B_desired = 100;  setDrive(); }
-void fwd_slow(void)  { DC_A_desired = 75;   DC_B_desired = 75;   setDrive(); }
-void rev_fast(void)  { DC_A_desired = -100; DC_B_desired = -100; setDrive(); }
-void rev_slow(void)  { DC_A_desired = -75;  DC_B_desired = -75;  setDrive(); }
-void right(void)     { DC_A_desired = 90;   DC_B_desired = 50;   setDrive(); }
-void left(void)      { DC_A_desired = 50;   DC_B_desired = 90;   setDrive(); }
-void right_slow(void){ DC_A_desired = 60;   DC_B_desired = 30;   setDrive(); }
-void left_slow(void) { DC_A_desired = 30;   DC_B_desired = 60;   setDrive(); }
+void fwd_fast(void)  { DC_A_desired = 100;   DC_B_desired = 100;   setDrive(); }
+void fwd_slow(void)  { DC_A_desired = 75;    DC_B_desired = 75;    setDrive(); }
+void rev_fast(void)  { DC_A_desired = -100;  DC_B_desired = -100;  setDrive(); }
+void rev_slow(void)  { DC_A_desired = -75;   DC_B_desired = -75;   setDrive(); }
+void right(void)     { DC_A_desired = 90;    DC_B_desired = 50;    setDrive(); }
+void left(void)      { DC_A_desired = 50;    DC_B_desired = 90;    setDrive(); }
+void right_slow(void){ DC_A_desired = 60;    DC_B_desired = 30;    setDrive(); }
+void left_slow(void) { DC_A_desired = 30;    DC_B_desired = 60;    setDrive(); }
 void right_ip(void)  { DC_A_desired = 100;   DC_B_desired = -100;  setDrive(); }
 void left_ip(void)   { DC_A_desired = -100;  DC_B_desired = 100;   setDrive(); }
 
@@ -83,20 +83,12 @@ void setDrive(void) {
 	else if (DC_A_curr < 0) { setLeftRev(); OCR4A = 255 + DC_A_curr * 255 / 100.0; }
 	if (DC_B_curr >= 0) { setRightFwd(); OCR4B = DC_B_curr * 255 / 100.0; }
 	else if (DC_B_curr < 0) { setRightRev(); OCR4B = 255 + DC_B_curr * 255 / 100.0; }
-
-	// m_usb_tx_string("\nOCR4A:");
-	// m_usb_tx_int(OCR4A);
-	// m_usb_tx_string("\tOCR4B:");
-	// m_usb_tx_int(OCR4B);
 }
 
 // Test Code to test Motor Controller
 void drive_test(void) {
 	int i = 500;
-	while ( i > 0) {
-		rev_fast();  i--;
-		
-	}
+	while ( i > 0) { rev_fast();  i--; }
 }
 
 // Returns Output of PID comparison on Omega
@@ -148,11 +140,6 @@ void celebrate(void) {
 	stop();
 }
 
-
-void checkStuckBot(void) {
-	//if (velX == 0 && velY == 0) { rev_fast(); }
-}
-
 void setPatrolDirection(void) {
 	if (velX > 0) { patrolDirection = 0; } else { patrolDirection = 1; }
 }
@@ -168,10 +155,8 @@ void patrol(void) {
  		patrolDirection = 0; // set patrol in positive x velocity
  	} 
  	// instruct patrol path depending on direction of patrol 
-	if (patrolDirection) { goToPoint(-patrolXRange, patrolY); } //m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
-	//m_usb_tx_string("\tg2x: "); m_usb_tx_int(minTraversalX); m_usb_tx_string("\tg2y: "); m_usb_tx_int(patrolY); }
-	else { goToPoint(patrolXRange, patrolY); }//m_usb_tx_string("\nx: "); m_usb_tx_int(posX); m_usb_tx_string("\ty: "); m_usb_tx_int(posY);
-	//m_usb_tx_string("\tg2x: "); m_usb_tx_int(maxTraversalX); m_usb_tx_string("\tg2y: "); m_usb_tx_int(patrolY);}
+	if (patrolDirection) { goToPoint(-patrolXRange, patrolY); }
+	else { goToPoint(patrolXRange, patrolY); }
 	
 }
 
@@ -213,22 +198,6 @@ void goToGoal(void) {
 			setDrive();
 		}
 	}
-		if (time %10 == 0) {
-		m_usb_tx_string("\nx:");
-		m_usb_tx_int((int) (posX));
-		m_usb_tx_string("\ty:");
-		m_usb_tx_int((int) (posY));
-		m_usb_tx_string("\ttheta:");
-		m_usb_tx_int((int) (theta*1000));
-		m_usb_tx_string("\ttheta2goal:");
-		m_usb_tx_int((int) (thetaToGoal*1000));
-		m_usb_tx_string("\tdiff:");
-		m_usb_tx_int((int) ((theta - thetaToGoal)*1000));
-		m_usb_tx_string("\tDCA:");
-		m_usb_tx_int((int) (DC_A_desired));
-		m_usb_tx_string("\tDCB:");
-		m_usb_tx_int((int) (DC_B_desired));
-	}
 }
 
 
@@ -241,24 +210,10 @@ int goToPoint(int x, int y) {
 		stop();
 		return 1;
 	} else if ((theta - thetaToPos) > .2) {
-		// m_usb_tx_string("R");
 		right();
 	} else if ((thetaToPos - theta) > .2) {
-		// m_usb_tx_string("L");
 		left();
 	} else { fwd_fast(); }
-	if (time %10 == 0) {
-		// m_usb_tx_string("\nx:");
-		// m_usb_tx_int((int) (posX));
-		// m_usb_tx_string("\ty:");
-		// m_usb_tx_int((int) (posY));
-		// m_usb_tx_string("\ttheta:");
-		// m_usb_tx_int((int) (theta*1000));
-		// m_usb_tx_string("\ttheta2goal:");
-		// m_usb_tx_int((int) (thetaToPos*1000));
-		// m_usb_tx_string("\tdiff:");
-		// m_usb_tx_int((int) ((theta - thetaToPos)*1000));
-	}
 	return 0;
 }
 

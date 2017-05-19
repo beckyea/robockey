@@ -85,9 +85,7 @@ void init_driver(void) {
 	clear(TCCR4D,WGM41); clear(TCCR4D,WGM40); // Count UP to OCR4C
 	set(TCCR4A,PWM4A); set(TCCR4A,COM4A1); clear(TCCR4A,COM4A0); //PWM, set at rollover, clear at OCR4A
 	set(TCCR4A,PWM4B); set(TCCR4A,COM4B1); clear(TCCR4A,COM4B0); //PWM, set at rollover, clear at OCR4B
-
-	// set(TIMSK4,OCIE4A); //Enable interrupt when TCNT1 = OCR1A
-	// set(TIMSK4,OCIE4B); //Enable interrupt when TCNT1 = OCR1B
+	
 	OCR4C = 255;
 	OCR4A = 255;
 	OCR4B = 255;
